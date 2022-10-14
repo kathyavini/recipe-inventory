@@ -1,13 +1,25 @@
 const Recipe = require('../models/recipe');
 
-// Dispay site homepage
-exports.index = (req, res) => {
-  res.send('NOT IMPLEMENTED: Site Home Page');
-};
+// // Dispay site homepage
+// exports.index = (req, res) => {
+//   res.send('NOT IMPLEMENTED: Site Home Page');
+// };
 
 // Display list of all Recipes.
-exports.recipe_list = (req, res) => {
-  res.render('recipe', { title: 'Fake Recipe' });
+exports.recipe_list = (req, res, next) => {
+  Recipe.find({}, 'name description image categories')
+    .sort({ name: 1 })
+    .populate('categories')
+    .exec((err, list_recipes) => {
+      if (err) {
+        return next(err);
+      }
+      // Successful, so render
+      res.render('recipe_list', {
+        title: 'All Recipes',
+        recipes: list_recipes,
+      });
+    });
 };
 
 // Display detail page for a specific Recipe.

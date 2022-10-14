@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Calistoga&family=Open+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <meta name="viewport" content="width=device-width initial-scale=1" />
+    <title><%= title %> - Odin Recipes</title>
+    <link rel="stylesheet" href="/stylesheets/style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="logo">
+        <a href="/"><h2>Odin<span class="blue">Recipes</span></a></h2>
+      </div>
+      <div class="links">
+        <h3><a href="recipes">Recipes</a></h3>
+        <h3><a href="categories">Categories</a></h3>
+      </div>
+    </header>
+    <main class="category-list">
+      <h1><%= title %></h1>
+      <div class="category-cards">
+            <% categories.forEach(function(category) { %>
+            <a href="<%= category.url %>">
+                <div class="category-card">
+                    <img src="/images/<%=category.image%>"/>
+                    <div>
+                        <h2><%= category.name%></h2>
+                    </div>
+                </div>
+            </a>
+            <% }); %>
+        </div>
+    </main>
+  </body>
+</html>

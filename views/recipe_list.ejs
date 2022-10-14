@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Calistoga&family=Open+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <meta name="viewport" content="width=device-width initial-scale=1" />
+    <title><%= title %> - Odin Recipes</title>
+    <link rel="stylesheet" href="/stylesheets/style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="logo">
+        <a href="/"><h2>Odin<span class="blue">Recipes</span></a></h2>
+      </div>
+      <div class="links">
+        <h3><a href="recipes">Recipes</a></h3>
+        <h3><a href="categories">Categories</a></h3>
+      </div>
+    </header>
+    <main class="recipe-list">
+      <h1><%= title %></h1>
+        <% recipes.forEach(function(recipe) { %>
+          <a href="<%= recipe.url %>">
+            <div class="recipe-card">
+                <div class="recipe-top">
+                    <img src="/images/<%=recipe.image%>"/>
+                    <div>
+                        <h2><%= recipe.name%></h2>
+                    </div>
+                </div>
+                <div class="recipe-text"> 
+                    <p class="category-list"> Categories: 
+                        <span>
+                        <% recipe.categories.forEach(function (tag, index) { %>
+                        <%= index == 0 ? '' : '• ' %><%= tag.name%>
+                        <% }); %>
+                        </span>
+                    </p>
+                    <!-- <p><%= recipe.description%></p> -->
+                </div>
+            </div>
+          </a>
+        <% }); %>
+    </main>
+  </body>
+</html>

@@ -10,9 +10,9 @@
   --muted-black: rgb(75, 85, 99);
 }
 
-* {
-  /* border: 1px solid salmon; */
-}
+/* * {
+  border: 1px solid salmon;
+} */
 
 .blue {
   color: var(--blue);
@@ -25,10 +25,15 @@
 }
 
 body {
-  padding: 10vw;
+  padding-block: min(5vh, 10vw);
+  padding-inline: 10vw;
   font-family: var(--main-font);
   height: 100vh;
   color: var(--black);
+}
+
+img {
+  object-fit: cover;
 }
 
 a {
@@ -51,6 +56,7 @@ main.welcome h1 {
 main.welcome p {
   font-size: 1.5rem;
 }
+
 .nav-buttons {
   display: flex;
   gap: 1.5rem;
@@ -90,13 +96,15 @@ header {
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
+  line-height: 0;
+  padding-bottom: 1rem;
+  column-gap: min(30px, 5vw);
 }
 
 header div.logo a {
   color: var(--black);
   font-family: var(--secondary-font);
   font-size: clamp(1.5rem, 1rem + 4vw, 3rem);
-  height: min-content;
 }
 
 header a:hover {
@@ -104,10 +112,8 @@ header a:hover {
 }
 
 header div.links {
-  margin-left: auto;
   display: flex;
   gap: min(30px, 5vw);
-  padding-left: min(30px, 5vw);
   font-size: clamp(0.5rem, 0.5rem + 3vw, 1.7rem);
 }
 
@@ -115,7 +121,8 @@ header div.links a:hover{
   color: var(--gold);
 }
 
-main.recipe, header {
+main.recipe, main.recipe-list, header {
+  min-width: 200px;
   max-width: 800px;
 }
 
@@ -137,4 +144,83 @@ main.recipe h2 {
 
 main.recipe ul li::marker {
   color: var(--blue);
+}
+
+main.recipe-list h1 {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+main.recipe-list img {
+  width: 125px;
+  height: 125px;
+  flex: none;
+  border-radius: 3px;
+}
+
+main.recipe-list .recipe-card {
+  color: var(--gold);
+  display: flex;
+  flex-flow: column nowrap;
+  padding: 2vw;
+  margin-bottom: 5vh;
+  align-items: flex-start;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+}
+
+main.recipe-list .recipe-card .recipe-top {
+  display: flex;
+  flex-flow: row nowrap;
+  gap: 2vw;
+  justify-content: start;
+  align-items: center;
+}
+
+main.recipe-list a:hover {
+  text-decoration: none;
+}
+
+main.recipe-list .recipe-card .category-list {
+  font-weight: 500;
+  color: var(--dull-gold);
+}
+
+main.recipe-list .recipe-card .category-list span {
+  color: var(--muted-black);
+}
+
+main.recipe-list .recipe-card .recipe-text {
+  overflow: hidden;
+  text-overflow: ellipsis ellipsis;
+  max-height: 6rem;
+}
+
+main.category-list img {
+  width: 175px;
+  height: 175px;
+  flex: none;
+  border-radius: 3px;
+}
+
+main.category-list .category-cards {
+  display: flex;
+  flex-flow: row wrap;
+  margin-bottom: 5vh;
+  align-items: center;
+  gap: min(30px, 4vw);
+}
+
+main.category-list .category-card {
+  width: 250px;
+  text-align: center;
+  padding: 20px;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+}
+
+main.category-list a {
+  color: var(--gold);
+}
+
+main.category-list a:hover {
+  text-decoration: none;
 }

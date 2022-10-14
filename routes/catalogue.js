@@ -7,8 +7,8 @@ const category_controller = require('../controllers/categoryController');
 
 /// RECIPE ROUTES ///
 
-// GET catalog home page.
-router.get('/', recipe_controller.index);
+// // GET catalog home page.
+// router.get('/', recipe_controller.index);
 
 // GET request for creating a Recipe. NOTE This must come before routes that display Recipe (uses id).
 router.get('/recipe/create', recipe_controller.recipe_create_get);

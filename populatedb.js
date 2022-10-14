@@ -42,8 +42,8 @@ function recipeCreate(recipeDetails, cb) {
   });
 }
 
-function categoryCreate(name, cb) {
-  const category = new Category({ name: name });
+function categoryCreate(name, image, cb) {
+  const category = new Category({ name: name, image: image });
 
   category.save((err) => {
     if (err) {
@@ -61,16 +61,16 @@ function createCategories(cb) {
   async.series(
     [
       function (callback) {
-        categoryCreate('South Indian', callback);
+        categoryCreate('South Indian', 'idli.jpg', callback);
       },
       function (callback) {
-        categoryCreate('North Indian', callback);
+        categoryCreate('North Indian', 'karahi.jpg', callback);
       },
       function (callback) {
-        categoryCreate('Japanese', callback);
+        categoryCreate('Japanese', 'veggies.jpg', callback);
       },
       function (callback) {
-        categoryCreate('Favourites', callback);
+        categoryCreate('Favourites', 'pancakes.jpg', callback);
       },
     ],
     // optional callback
@@ -88,6 +88,7 @@ function createRecipes(cb) {
             name: 'Sukhe Chole',
             description:
               "This is a nice South Indian-style dry chana recipe, sweet and salty and not overwhelmed by spice. The key to success is carmelizing the onions first and making sure the chole is well-drained! The original recipe is by Dassana Amit of Dassana's Veg Recipes. Her website is a treasure trove of vegetarian Indian recipes and I have used it often! Link to the original recipe:",
+            image: 'chole.jpg',
             ingredients: [
               'two cups dry chana, cooked (instant pot for 52 minutes)',
               '4 small or 2.5 medium onions, thinly sliced',
@@ -123,6 +124,7 @@ function createRecipes(cb) {
             name: 'Gujarati Dry Mung Beans',
             description:
               'This is my favourite sweet and sour way to prepare mung beans (hari daal), with cinnamon, brown sugar, lemon juice (although I usually substitute tamarind), and curry leaves. The original recipe by Sanjana Modha is available on her website:',
+            image: 'mung-beans.jpg',
             ingredients: [
               '1.5 cups mung beans, cooked in the instant pot (15 min in 1.75 cups of water',
               '2 tbs vegetable or coconut oil',
@@ -159,6 +161,7 @@ function createRecipes(cb) {
             name: 'Sushi Rice',
             description:
               'A super simple and quick recipe I use to make just a single serving of sushi rice. Goes well in inari, or to make onigiri. Scaled down from the original recipe on Gimme Some Oven: ',
+            image: 'rice.jpg',
             ingredients: [
               '1.5 cups cooked rice, ideally Japanese short-grain (but I usually just make with the basmati rice I have on hand)',
               '1/2 tsp salt',
