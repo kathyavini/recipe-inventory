@@ -7,7 +7,7 @@ exports.index = (req, res) => {
 
 // Display list of all Recipes.
 exports.recipe_list = (req, res) => {
-  res.send('NOT IMPLEMENTED: Recipe list');
+  res.render('recipe', { title: 'Fake Recipe' });
 };
 
 // Display detail page for a specific Recipe.

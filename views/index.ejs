@@ -1,11 +1,37 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Calistoga&family=Open+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <meta name="viewport" content="width=device-width initial-scale=1" />
     <title><%= title %></title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <link rel="stylesheet" href="/stylesheets/style.css" />
   </head>
   <body>
-    <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
+    <main class="welcome">
+      <h1>Odin <span class="blue">Recipes</span></h1>
+      <p>Welcome to <%= title %>!</p>
+      <p>
+        The
+        <a href="https://www.theodinproject.com/lessons/foundations-recipes"
+          >first TOP project</a
+        >
+        reimagined for the
+        <a
+          href="https://www.theodinproject.com/lessons/nodejs-inventory-application"
+          >backend course</a
+        >.
+      </p>
+      <nav class="nav-buttons">
+        <a href="/catalogue/recipes"><button class="black">Recipes</button></a>
+        <a href="/catalogue/categories"
+          ><button class="black">Categories</button></a
+        >
+      </nav>
+    </main>
   </body>
 </html>
