@@ -87,7 +87,7 @@ function createRecipes(cb) {
           {
             name: 'Sukhe Chole',
             description:
-              "This is a nice South Indian-style dry chana recipe, sweet and salty and not overwhelmed by spice. The key to success is carmelizing the onions first and making sure the chole is well-drained! The original recipe is by Dassana Amit of Dassana's Veg Recipes. Her website is a treasure trove of vegetarian Indian recipes and I have used it often! Link to the original recipe:",
+              "This is a nice South Indian-style dry chana recipe, sweet and salty and not overwhelmed by spice. The key to success is carmelizing the onions first and making sure the chole is well-drained! The original recipe is by Dassana Amit of Dassana's Veg Recipes. Her website is a treasure trove of vegetarian Indian recipes and I have used it often!",
             image: 'chole.jpg',
             ingredients: [
               'two cups dry chana, cooked (instant pot for 52 minutes)',
@@ -123,12 +123,12 @@ function createRecipes(cb) {
           {
             name: 'Gujarati Dry Mung Beans',
             description:
-              'This is my favourite sweet and sour way to prepare mung beans (hari daal), with cinnamon, brown sugar, lemon juice (although I usually substitute tamarind), and curry leaves. The original recipe by Sanjana Modha is available on her website:',
+              'This is my favourite sweet and sour way to prepare mung beans (hari daal), with cinnamon, brown sugar, lemon juice (although I usually substitute tamarind), and curry leaves. The original recipe by Sanjana Modha is available on her website.',
             image: 'mung-beans.jpg',
             ingredients: [
               '1.5 cups mung beans, cooked in the instant pot (15 min in 1.75 cups of water',
               '2 tbs vegetable or coconut oil',
-              '1 stp mustard seeds',
+              '1 tsp mustard seeds',
               'dash of hing',
               '2 stems curry leaves',
               '1 tbs garlic, minced',
@@ -160,7 +160,7 @@ function createRecipes(cb) {
           {
             name: 'Sushi Rice',
             description:
-              'A super simple and quick recipe I use to make just a single serving of sushi rice. Goes well in inari, or to make onigiri. Scaled down from the original recipe on Gimme Some Oven: ',
+              'A super simple and quick recipe I use to make just a single serving of sushi rice. Goes well in inari, or to make onigiri. Scaled down from the original recipe on Gimme Some Oven. ',
             image: 'rice.jpg',
             ingredients: [
               '1.5 cups cooked rice, ideally Japanese short-grain (but I usually just make with the basmati rice I have on hand)',

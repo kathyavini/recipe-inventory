@@ -17,27 +17,42 @@
         <a href="/"><h2>Odin<span class="blue">Recipes</span></a></h2>
       </div>
       <div class="links">
-        <h3><a href="recipes">Recipes</a></h3>
-        <h3><a href="categories">Categories</a></h3>
+        <h3><a href="/catalogue/recipes">Recipes</a></h3>
+        <h3><a href="/catalogue/categories">Categories</a></h3>
       </div>
     </header>
     <main class="recipe">
-      <h1>Fake recipe</h1>
-      <h2>South Indian, Favourites</h2>
-      <img src="/images/mung-beans.jpg" />
-      <p>Fake description text will go here</p>
+      <h1><%= title %></h1>
+
+      <h2>
+        <% recipe.categories.forEach(function (tag, index) { %>
+        <%= index == 0 ? '' : '• ' %>
+        <a href="<%=tag.url %>"><%= tag.name %></a>
+        <% }); %>
+      </h2>
+
+      <img src="/images/<%=recipe.image%>" />
+
+      <p><%= recipe.description %></p>
+
+      <% if(recipe.sourceLink) { %>
+        <p>Link to original recipe: <a href="<%=  recipe.sourceLink %>">
+          <%= recipe.sourceText %></a>
+        </p>
+      <% }; %>
+
+      <h2>Ingredients:</h2>
       <ul>
-        <li>This is an ingredient item</li>
-        <li>This is an ingredient item</li>
-        <li>This is an ingredient item</li>
-        <li>This is an ingredient item</li>
-        <li>This is an ingredient item</li>
+        <% recipe.ingredients.forEach(function (ingredient) { %>
+          <li><%= ingredient %></li>
+        <% }); %>
       </ul>
+
+      <h2>Steps:</h2>
       <ol>
-        <li>This is a step item</li>
-        <li>This is a step item</li>
-        <li>This is a step item</li>
-        <li>This is a step item</li>
+        <% recipe.steps.forEach(function (step) { %>
+          <li><%= step %></li>
+        <% }); %>
       </ol>
     </main>
   </body>

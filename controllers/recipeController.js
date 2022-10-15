@@ -23,8 +23,27 @@ exports.recipe_list = (req, res, next) => {
 };
 
 // Display detail page for a specific Recipe.
-exports.recipe_detail = (req, res) => {
-  res.send(`NOT IMPLEMENTED: Recipe detail: ${req.params.id}`);
+exports.recipe_detail = (req, res, next) => {
+  Recipe.findById(req.params.id)
+    .populate('categories')
+    .exec((err, recipe_detail) => {
+      if (err) {
+        return next(err);
+      }
+
+      // db query returns no results
+      if (recipe_detail == null) {
+        const err = new Error('Recipe not found');
+        err.status = 404;
+        return next(err);
+      }
+
+      // Successful, so render
+      res.render('recipe', {
+        title: recipe_detail.name,
+        recipe: recipe_detail,
+      });
+    });
 };
 
 // Display Recipe create form on GET.

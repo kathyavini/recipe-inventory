@@ -1,4 +1,6 @@
 const Category = require('../models/category');
+const Recipe = require('../models/recipe');
+const async = require('async');
 
 // Display list of all Categories.
 exports.category_list = (req, res, next) => {
@@ -17,8 +19,38 @@ exports.category_list = (req, res, next) => {
 };
 
 // Display detail page for a specific Category.
-exports.category_detail = (req, res) => {
-  res.send(`NOT IMPLEMENTED: Category detail: ${req.params.id}`);
+exports.category_detail = (req, res, next) => {
+  async.parallel(
+    {
+      category(callback) {
+        Category.findById(req.params.id).exec(callback);
+      },
+      category_recipes(callback) {
+        Recipe.find({ categories: req.params.id })
+          .sort({ name: 1 })
+          .exec(callback);
+      },
+    },
+    (err, results) => {
+      if (err) {
+        return next(err);
+      }
+
+      // db query returns no results
+      if (results.category == null) {
+        const err = new Error('Category not found');
+        err.status = 404;
+        return next(err);
+      }
+
+      // Successful, so render
+      res.render('category', {
+        title: results.category.name,
+        recipes: results.category_recipes,
+        category: results.category,
+      });
+    }
+  );
 };
 
 // Display Category create form on GET.
