@@ -23,16 +23,19 @@
     </header>
     <main class="category-list">
       <h1><%= title %></h1>
+
+      <p><a href="/catalogue/category/create">Create a new category</a></p>
+
       <div class="category-cards">
             <% categories.forEach(function(category) { %>
-            <a href="<%= category.url %>">
+              <a href="<%= category.url %>">
                 <div class="category-card">
                     <img src="/images/<%=category.image%>"/>
                     <div>
                         <h2><%= category.name%></h2>
                     </div>
                 </div>
-            </a>
+              </a>
             <% }); %>
         </div>
     </main>

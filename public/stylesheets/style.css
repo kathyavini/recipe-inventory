@@ -224,3 +224,21 @@ main.category-list a {
 main.category-list a:hover {
   text-decoration: none;
 }
+
+.validation-messages {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+form {
+  display: flex;
+  flex-flow: column nowrap;
+  padding: 2rem;
+  gap: 1rem;
+  box-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px;
+}
+
+form input {
+  font-size: 1.2rem;
+  border-radius: .375rem;
+}
