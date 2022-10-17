@@ -39,7 +39,11 @@ const category_controller = require('../controllers/categoryController');
 router.get('/recipe/create', recipe_controller.recipe_create_get);
 
 // POST request for creating Recipe.
-router.post('/recipe/create', recipe_controller.recipe_create_post);
+router.post(
+  '/recipe/create',
+  upload.single('recipeImage'),
+  recipe_controller.recipe_create_post
+);
 
 // GET request to delete Recipe.
 router.get('/recipe/:id/delete', recipe_controller.recipe_delete_get);

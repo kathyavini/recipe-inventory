@@ -242,3 +242,8 @@ form input {
   font-size: 1.2rem;
   border-radius: .375rem;
 }
+
+fieldset.options {
+  display: flex;
+  flex-flow: column nowrap;
+}

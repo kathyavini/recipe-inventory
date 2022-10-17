@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Calistoga&family=Open+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <meta name="viewport" content="width=device-width initial-scale=1" />
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/stylesheets/style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="logo">
+        <a href="/"><h2>Odin<span class="blue">Recipes</span></a></h2>
+      </div>
+      <div class="links">
+        <h3><a href="/catalogue/recipes">Recipes</a></h3>
+        <h3><a href="/catalogue/categories">Categories</a></h3>
+      </div>
+    </header>
+    <main class="recipe">
+      <h1><%= title %></h1>
+
+      <h3>Required fields are marked with a *.</h3>
+
+      <% if (locals.errors) { %>
+        <% errors.forEach(function (error) { %>
+            <p class="validation-messages">
+                <%= error.msg %>
+            </p>
+        <% }); %>
+      <% }; %>
+
+      <form method="POST" action="" encType="multipart/form-data">
+        
+        <label for="name">Recipe Name: *</label>
+        <input
+            id="name"
+            name="name"
+            placeholder="Name"
+            value="<%= locals.recipe ? recipe.name : '' %>"/>
+        
+        <label for="description">Recipe Description: (optional) </label>
+        <textarea
+            id="description"
+            name="description"
+            placeholder="Description"
+            value="<%= locals.recipe ? recipe.description : '' %>"></textarea>
+
+        <label for="ingredients">Recipe Ingredients: *
+            <p>Please begin each ingredient on its own line and start each line with a dash</p>
+        </label>
+        <textarea
+            id="ingredients"
+            name="ingredients"
+            placeholder="<%=`- 1 red onion
+- 4 cloves of garlic`%>"
+            rows="8"><%= locals.recipe ? '- ' + recipe.ingredients.join('\r\n\- ') : '' %></textarea>
+
+        <label for="steps">Recipe Steps: *
+            <p>Please begin each step on its own line and start each line with a dash</p>
+        </label>
+        <textarea
+            id="steps"
+            name="steps"
+            placeholder="<%=`- chop the onions and garlic
+- heat oil in the pan`%>"
+            rows="8"><%= locals.recipe ? '- ' + recipe.steps.join('\r\n\- ') : '' %></textarea>
+        
+        <label for="source-link">Link to original source for the recipe (if applicable):
+        </label>
+        <input
+            id="source-link"
+            name="source-link"
+            placeholder="e.g. https://minimalistbaker.com/easy-tofu-pad-thai/"
+            value="<%= locals.recipe ? recipe.sourceLink : '' %>"/>
+
+        <label for="sourceText">Source link text (optional): </label>
+        <input
+            id="source-text"
+            name="source-text"
+            placeholder="e.g. Easy Tofu Pad Thai - Minimalist Baker"
+            value="<%= locals.recipe ? recipe.sourceText : '' %>"/>
+        
+        <fieldset class="options" for="categories">
+            <legend>Choose categories: </legend>
+            <% categories.forEach(function (category) { %>
+                <div>
+                    <input
+                        type="checkbox"
+                        id="<%= category._id %>"
+                        name="categories"
+                        value="<%= category._id %>"
+                        <%= category.checked ? 'checked' : ''%>
+                    />
+                    <label for="<%= category._id %>"><%= category.name %></label>
+                </div>
+    
+            <% }); %>
+        </fieldset>
+
+        <label for="recipe-image">Upload an image for your recipe: * </label>
+        <input
+            type="file"
+            name="recipeImage"
+            accept="image/*"/>
+        <button>Submit</button>
+      </form>
+
+      
+    </main>
+  </body>
+</html>
