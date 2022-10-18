@@ -24,39 +24,18 @@
     <main class="recipe">
       <h1><%= title %></h1>
 
-      <h2>
-        <% recipe.categories.forEach(function (tag, index) { %>
-        <%= index == 0 ? '' : '• ' %>
-        <a href="<%=tag.url %>"><%= tag.name %></a>
-        <% }); %>
-      </h2>
-
       <img src="/images/<%=recipe.image%>" />
 
-      <p><%= recipe.description %></p>
-
-      <% if(recipe.sourceLink) { %>
-        <p>Link to original recipe: <a href="<%=  recipe.sourceLink %>">
-          <%= recipe.sourceText %></a>
-        </p>
-      <% }; %>
-
-      <h2>Ingredients:</h2>
-      <ul>
-        <% recipe.ingredients.forEach(function (ingredient) { %>
-          <li><%= ingredient %></li>
-        <% }); %>
-      </ul>
-
-      <h2>Steps:</h2>
-      <ol>
-        <% recipe.steps.forEach(function (step) { %>
-          <li><%= step %></li>
-        <% }); %>
-      </ol>
+      <h2>Are you sure you want to delete this recipe?</h2>
+      <form method="POST" action=''>
+        <input
+            type="hidden"
+            name="recipeid"
+            value="<%= recipe._id %>"
+            required/>
+        <button type="submit">Delete Recipe</button>
+      </form>
+      
     </main>
-    <footer>
-      <p><a href="<%=recipe.url + '/delete'%>">Delete this recipe</a></p>
-    </footer>
   </body>
 </html>

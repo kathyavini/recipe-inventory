@@ -247,3 +247,9 @@ fieldset.options {
   display: flex;
   flex-flow: column nowrap;
 }
+
+footer {
+  margin-top: 5vh;
+  padding-top: 1rem;
+  border-top: 1px solid var(--muted-black);
+}

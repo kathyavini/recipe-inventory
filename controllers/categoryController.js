@@ -145,13 +145,106 @@ exports.category_create_post = [
 ];
 
 // Display Category delete form on GET.
-exports.category_delete_get = (req, res) => {
-  res.send('NOT IMPLEMENTED: Category delete GET');
+exports.category_delete_get = (req, res, next) => {
+  async.parallel(
+    {
+      category(callback) {
+        Category.findById(req.params.id).exec(callback);
+      },
+      category_recipes(callback) {
+        Recipe.find({ categories: req.params.id }).exec(callback);
+      },
+    },
+    (err, results) => {
+      if (err) {
+        return next(err);
+      }
+      if (results.category == null) {
+        // No results.
+        res.redirect('/catalogue/categories');
+      }
+      // Successful, so render.
+      res.render('category_delete', {
+        title: `Delete Category: ${results.category.name}`,
+        category: results.category,
+        recipes: results.category_recipes,
+      });
+    }
+  );
 };
 
 // Handle Category delete on POST.
-exports.category_delete_post = (req, res) => {
-  res.send('NOT IMPLEMENTED: Category delete POST');
+exports.category_delete_post = (req, res, next) => {
+  async.parallel(
+    {
+      category(callback) {
+        Category.findById(req.body.categoryid).exec(callback);
+      },
+    },
+    (err, results) => {
+      if (err) {
+        return next(err);
+      }
+
+      // Check for use of image in other categories and images; otherwise delete
+      // Note: this won't apply to uploaded images are they are given unique ids
+      async.parallel(
+        {
+          imgCategories(imgCb) {
+            Category.find({ image: results.category.image }).exec(imgCb);
+          },
+          imgRecipes(imgCb) {
+            Recipe.find({ image: results.category.image }).exec(imgCb);
+          },
+        },
+        (err, imgResults) => {
+          if (err) {
+            return next(err);
+          }
+
+          if (
+            imgResults.imgCategories.length == 1 &&
+            imgResults.imgRecipes.length == 0
+          ) {
+            // image is in use by no other objects and can be deleted
+            fs.unlink(`public/images/${results.category.image}`, (err) => {
+              if (err) {
+                // Not a big issue if the image deletion fails; just log it
+                console.log(err);
+              }
+            });
+          }
+        }
+      );
+
+      // Delete category and its references
+      async.parallel(
+        {
+          delete_category(deleteCb) {
+            Category.findByIdAndRemove(req.body.categoryid).exec(deleteCb);
+          },
+          delete_references(deleteCb) {
+            Recipe.updateMany(
+              { categories: req.body.categoryid },
+              {
+                $pullAll: {
+                  categories: [req.body.categoryid],
+                },
+              }
+            ).exec(deleteCb);
+          },
+        },
+        (err) => {
+          if (err) {
+            return next(err);
+          }
+
+          // Success - go to category list
+          res.redirect('/catalogue/categories');
+        }
+      );
+    }
+  );
 };
 
 // Display Category update form on GET.

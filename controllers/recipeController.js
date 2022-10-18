@@ -248,13 +248,86 @@ exports.recipe_create_post = [
 ];
 
 // Display Recipe delete form on GET.
-exports.recipe_delete_get = (req, res) => {
-  res.send('NOT IMPLEMENTED: Recipe delete GET');
+exports.recipe_delete_get = (req, res, next) => {
+  async.parallel(
+    {
+      // only using async to keep in same format as category delete
+      recipe(callback) {
+        Recipe.findById(req.params.id).exec(callback);
+      },
+    },
+    (err, results) => {
+      if (err) {
+        return next(err);
+      }
+      if (results.recipe == null) {
+        // No results.
+        res.redirect('/catalogue/recipes');
+      }
+      // Successful, so render.
+      res.render('recipe_delete', {
+        title: `Delete Recipe: ${results.recipe.name}`,
+        recipe: results.recipe,
+      });
+    }
+  );
 };
 
 // Handle Recipe delete on POST.
-exports.recipe_delete_post = (req, res) => {
-  res.send('NOT IMPLEMENTED: Recipe delete POST');
+exports.recipe_delete_post = (req, res, next) => {
+  async.parallel(
+    {
+      recipe(callback) {
+        Recipe.findById(req.body.recipeid).exec(callback);
+      },
+    },
+    (err, results) => {
+      if (err) {
+        return next(err);
+      }
+
+      // Check for use of image in other categories and images; otherwise delete
+      // Note: this won't apply to uploaded images are they are given unique ids
+      async.parallel(
+        {
+          imgCategories(imgCb) {
+            Category.find({ image: results.recipe.image }).exec(imgCb);
+          },
+          imgRecipes(imgCb) {
+            Recipe.find({ image: results.recipe.image }).exec(imgCb);
+          },
+        },
+        (err, imgResults) => {
+          if (err) {
+            return next(err);
+          }
+
+          if (
+            imgResults.imgCategories.length == 0 &&
+            imgResults.imgRecipes.length == 1
+          ) {
+            // image is in use by no other objects and can be deleted
+            fs.unlink(`public/images/${results.recipe.image}`, (err) => {
+              if (err) {
+                // Not a big issue if the image deletion fails; just log it
+                console.log(err);
+              }
+            });
+          }
+        }
+      );
+
+      // Delete recipe
+      Recipe.findByIdAndRemove(req.body.recipeid, (err) => {
+        if (err) {
+          return next(err);
+        }
+
+        // Success - go to recipe list
+        res.redirect('/catalogue/recipes');
+      });
+    }
+  );
 };
 
 // Display Recipe update form on GET.
