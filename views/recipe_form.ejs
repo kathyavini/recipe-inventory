@@ -101,17 +101,30 @@
             <% }); %>
         </fieldset>
 
-        
-        <label for="recipe-image">Upload an image for your recipe: * </label>
-        <input
-            type="file"
-            name="recipeImage"
-            accept="image/*"/>
+        <% if (locals.recipe && recipe.image) { %>
+          <h3>Image preview</h3>
+          <img class="image-preview" src="/images/<%=recipe.image%>"/>
+          <input
+          type="hidden"
+          name="imagePath"
+          value="<%= recipe.image %>"/>
 
-        <button>Submit</button>
+          <label for="recipe-image">Upload a different image: </label>
+        <% } else { %>
+          <label for="recipe-image">Upload an image for your recipe: * </label>
+        <% }; %>
+
+        <input
+          id="recipe-image"
+          type="file"
+          name="recipeImage"
+          accept="image/*"/>
+
+        <button id="form-submit">Submit</button>
       </form>
 
-      
     </main>
   </body>
+  
+
 </html>

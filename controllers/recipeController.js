@@ -102,7 +102,7 @@ exports.recipe_create_post = [
     // Extract the express-validator errors
     const errors = validationResult(req).array();
 
-    if (req.file == undefined) {
+    if (!req.body.imagePath && req.file == undefined) {
       // Check if req.file exists
       // This will be empty both when an image isn't uploaded and when an unsupported image format (like webp) is selected by the user but rejected by multer's fileFilter
       errors.push({
@@ -123,6 +123,30 @@ exports.recipe_create_post = [
       return trimmedArray;
     };
 
+    // Get image path from previous upload or create new one
+    let imagePath;
+
+    if (req.body.imagePath && req.file == undefined) {
+      imagePath = req.body.imagePath;
+    } else if (req.body.imagePath && req.file) {
+      // Update image
+      imagePath = req.file.filename;
+      // And delete previous image
+      fs.unlink(`public/images/${req.body.imagePath}`, (err) => {
+        if (err) {
+          // Don't pass to next() if this errors; just console.log it
+          console.log(err);
+        }
+        console.log('Deleting previous upload: ' + req.body.imagePath);
+      });
+    } else if (!req.body.imagePath && req.file == undefined) {
+      // No file and nothing loaded -- error message will display
+      imagePath = '';
+    } else {
+      // No loaded file but new uploaded file
+      imagePath = req.file.filename;
+    }
+
     // Create a recipe object with escaped and trimmed data
     const recipe = new Recipe({
       name: req.body.name,
@@ -135,7 +159,7 @@ exports.recipe_create_post = [
       sourceLink: req.body.sourceLink,
       sourceText: req.body.sourceText,
       categories: req.body.categories,
-      image: req.file == undefined ? '' : req.file.filename,
+      image: imagePath,
     });
 
     if (errors.length > 0) {
@@ -163,15 +187,6 @@ exports.recipe_create_post = [
             errors,
           });
         });
-
-      // Also delete the multer upload if there was one, to prevent orphan files being saved to disk when nothing is being stored to the collection.
-      if (req.file) {
-        fs.unlink(req.file.path, (err) => {
-          if (err) {
-            return next(err);
-          }
-        });
-      }
       return;
     } else {
       // Data from form is valid (no express-validator errors)
@@ -202,15 +217,6 @@ exports.recipe_create_post = [
               }
             }
 
-            // Also delete the multer upload if there was one, to prevent orphan files being saved to disk when nothing is being stored to the collection.
-            if (req.file) {
-              fs.unlink(req.file.path, (err) => {
-                if (err) {
-                  return next(err);
-                }
-              });
-            }
-
             res.render('recipe_form', {
               title: 'Create Recipe',
               recipe,
@@ -220,7 +226,6 @@ exports.recipe_create_post = [
 
             return;
           }
-          // Recipe with this name not found
 
           // Save new data to the collection
           recipe.save((err) => {
@@ -230,10 +235,10 @@ exports.recipe_create_post = [
             // Recipe has been saved. Redirect to its detail page
             res.redirect(recipe.url);
           });
-        } // ends async optional callback
-      ); // ends async.series
-    } // ends check for errors.length
-  }, // ends controller callback
+        }
+      );
+    }
+  },
 ];
 
 // Display Recipe delete form on GET.
@@ -401,7 +406,7 @@ exports.recipe_update_post = [
     // Extract the express-validator errors
     const errors = validationResult(req).array();
 
-    if (req.file == undefined) {
+    if (!req.body.imagePath && req.file == undefined) {
       // Check if req.file exists
       // This will be empty both when an image isn't uploaded and when an unsupported image format (like webp) is selected by the user but rejected by multer's fileFilter
       errors.push({
@@ -422,6 +427,30 @@ exports.recipe_update_post = [
       return trimmedArray;
     };
 
+    // Get image path from previous upload or create new one
+    let imagePath;
+
+    if (req.body.imagePath && req.file == undefined) {
+      imagePath = req.body.imagePath;
+    } else if (req.body.imagePath && req.file) {
+      // Update image
+      imagePath = req.file.filename;
+      // And delete previous image
+      fs.unlink(`public/images/${req.body.imagePath}`, (err) => {
+        if (err) {
+          // Don't pass to next() if this errors; just console.log it
+          console.log(err);
+        }
+        console.log('Deleting previous upload: ' + req.body.imagePath);
+      });
+    } else if (!req.body.imagePath && req.file == undefined) {
+      // No file and nothing loaded -- error message will display
+      imagePath = '';
+    } else {
+      // No loaded file but new uploaded file
+      imagePath = req.file.filename;
+    }
+
     // Create a recipe object with escaped and trimmed data
     const recipe = new Recipe({
       name: req.body.name,
@@ -434,7 +463,7 @@ exports.recipe_update_post = [
       sourceLink: req.body.sourceLink,
       sourceText: req.body.sourceText,
       categories: req.body.categories,
-      image: req.file == undefined ? '' : req.file.filename,
+      image: imagePath,
       _id: req.params.id, //This is required, or a new ID will be assigned!
     });
 
@@ -464,16 +493,9 @@ exports.recipe_update_post = [
           });
         });
 
-      // Also delete the multer upload if there was one, to prevent orphan files being saved to disk when nothing is being stored to the collection.
-      if (req.file) {
-        fs.unlink(req.file.path, (err) => {
-          if (err) {
-            return next(err);
-          }
-        });
-      }
       return;
     }
+
     // Data from form is valid; update the record
     Recipe.findByIdAndUpdate(req.params.id, recipe, {}, (err, therecipe) => {
       if (err) {
