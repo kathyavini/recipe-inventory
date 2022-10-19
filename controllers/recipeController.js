@@ -65,11 +65,6 @@ exports.recipe_create_get = (req, res, next) => {
 exports.recipe_create_post = [
   // Convert the categories checked to an array.
   (req, res, next) => {
-    // also console.log them because I'm not sure how they are going to be printed
-    console.log('Converting checkboxes to an array');
-    console.log(req.body);
-    console.log(req.body.categories);
-
     if (!Array.isArray(req.body.categories)) {
       req.body.categories =
         typeof req.body.categories === 'undefined' ? [] : [req.body.categories];
@@ -89,24 +84,23 @@ exports.recipe_create_post = [
 
   body('steps', 'Steps are required').trim().isLength({ min: 1 }).escape(),
 
-  body('source-link', 'Please provide a valid URL')
+  body(
+    'sourceLink',
+    'Please provide a full valid URL (e.g. https://some-site.ca)'
+  )
     .trim()
     .optional({ checkFalsy: true })
-    .isURL()
+    .isURL({ require_protocol: true })
     .escape(),
 
-  body('source-text').trim().optional({ checkFalsy: true }).escape(),
+  body('sourceText').trim().optional({ checkFalsy: true }).escape(),
 
   body('categories.*').escape(),
 
   // Process request after validation and sanitization
   (req, res, next) => {
-    console.log('processing request after validation and sanitization');
     // Extract the express-validator errors
     const errors = validationResult(req).array();
-
-    console.log('Textarea prints as: ');
-    console.log(req.body.ingredients);
 
     if (req.file == undefined) {
       // Check if req.file exists
@@ -116,7 +110,7 @@ exports.recipe_create_post = [
       });
     }
 
-    // Process text area into arrays of strings
+    // Process text area input separated by new line + dash into arrays of strings
     const processTextArea = (string) => {
       // Split on newline
       let listArray = string.split(/\r?\n/);
@@ -162,9 +156,6 @@ exports.recipe_create_post = [
             }
           }
 
-          console.log('re-sending form with recipe: ');
-          console.log(recipe);
-
           res.render('recipe_form', {
             title: 'Create Recipe',
             categories: list_categories,
@@ -192,8 +183,8 @@ exports.recipe_create_post = [
           foundRecipe(callback) {
             Recipe.findOne({ name: req.body.name }, callback);
           },
-          categores(callback) {
-            Category.find(callback);
+          categories(callback) {
+            Category.find(callback).sort({ name: 1 });
           },
         },
         (err, results) => {
@@ -206,7 +197,7 @@ exports.recipe_create_post = [
               msg: 'A recipe with that name already exists in the database; please choose a different name.',
             });
 
-            for (const category of list_categories) {
+            for (const category of results.categories) {
               if (recipe.categories.includes(category._id)) {
                 category.checked = true;
               }
@@ -225,7 +216,7 @@ exports.recipe_create_post = [
             res.render('recipe_form', {
               title: 'Create Recipe',
               recipe,
-              categorie: results.categories,
+              categories: results.categories,
               errors,
             });
 
@@ -331,11 +322,182 @@ exports.recipe_delete_post = (req, res, next) => {
 };
 
 // Display Recipe update form on GET.
-exports.recipe_update_get = (req, res) => {
-  res.send('NOT IMPLEMENTED: Recipe update GET');
+exports.recipe_update_get = (req, res, next) => {
+  // Get both recipe and categories for the form
+  async.parallel(
+    {
+      recipe(callback) {
+        Recipe.findById(req.params.id).exec(callback);
+      },
+      categories(callback) {
+        Category.find(callback).sort({ name: 1 });
+      },
+    },
+    (err, results) => {
+      if (err) {
+        return next(err);
+      }
+
+      if (results.recipe == null) {
+        // No results in db
+        const err = new Error('Recipe not found');
+        err.status = 404;
+        return next(err);
+      }
+
+      // Success
+      // Mark the selected categories as checked
+      for (const category of results.categories) {
+        if (results.recipe.categories.includes(category._id)) {
+          category.checked = true;
+        }
+      }
+
+      res.render('recipe_form', {
+        title: 'Update Recipe: ' + results.recipe.name,
+        categories: results.categories,
+        recipe: results.recipe,
+      });
+    }
+  );
 };
 
 // Handle Recipe update on POST.
-exports.recipe_update_post = (req, res) => {
-  res.send('NOT IMPLEMENTED: Recipe update POST');
-};
+exports.recipe_update_post = [
+  // Convert the categories checked to an array.
+  (req, res, next) => {
+    console.log('Array actions. Acting on: ');
+    console.log(req.body);
+    if (!Array.isArray(req.body.categories)) {
+      req.body.categories =
+        typeof req.body.categories === 'undefined' ? [] : [req.body.categories];
+    }
+    next();
+  },
+
+  // Validate and sanitize text fields with express-validator
+  body('name', 'Recipe name required').trim().isLength({ min: 1 }).escape(),
+
+  body('description').trim().optional({ checkFalsy: true }).escape(),
+
+  body('ingredients', 'Ingredients are required')
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+
+  body('steps', 'Steps are required').trim().isLength({ min: 1 }).escape(),
+
+  body(
+    'sourceLink',
+    'Please provide a full valid URL (e.g. https://some-site.ca)'
+  )
+    .trim()
+    .optional({ checkFalsy: true })
+    .isURL({ require_protocol: true })
+    .escape(),
+
+  body('sourceText').trim().optional({ checkFalsy: true }).escape(),
+
+  body('categories.*').escape(),
+
+  // Process request after validation and sanitization
+  (req, res, next) => {
+    console.log('Received request: ');
+    console.log(req.body);
+    // Extract the express-validator errors
+    const errors = validationResult(req).array();
+
+    if (req.file == undefined) {
+      // Check if req.file exists
+      // This will be empty both when an image isn't uploaded and when an unsupported image format (like webp) is selected by the user but rejected by multer's fileFilter
+      errors.push({
+        msg: 'Please upload an image in .gif, .jpg/.jpeg, or .png format',
+      });
+    }
+
+    // Process text area input separated by new line + dash into arrays of strings
+    const processTextArea = (string) => {
+      // Split on newline
+      let listArray = string.split(/\r?\n/);
+
+      const trimmedArray = listArray.map((line) => {
+        // Remove leading dash and space (if included)
+        return line.replace(/[-][ ]?/, '');
+      });
+
+      return trimmedArray;
+    };
+
+    // Create a recipe object with escaped and trimmed data
+    const recipe = new Recipe({
+      name: req.body.name,
+      description: req.body.description,
+      ingredients:
+        req.body.ingredients == undefined
+          ? []
+          : processTextArea(req.body.ingredients),
+      steps: req.body.steps == undefined ? [] : processTextArea(req.body.steps),
+      sourceLink: req.body.sourceLink,
+      sourceText: req.body.sourceText,
+      categories: req.body.categories,
+      image: req.file == undefined ? '' : req.file.filename,
+      _id: req.params.id, //This is required, or a new ID will be assigned!
+    });
+
+    if (errors.length > 0) {
+      // Render the form again with sanitized values and error messages
+
+      // Get all categories for the form
+      Category.find({}, 'name')
+        .sort({ name: 1 })
+        .exec((err, list_categories) => {
+          if (err) {
+            return next(err);
+          }
+
+          // Mark already selected categories as checked
+          for (const category of list_categories) {
+            if (recipe.categories.includes(category._id)) {
+              category.checked = true;
+            }
+          }
+
+          console.log('Data invalid. Repopulating form with object: ');
+          console.log(recipe);
+
+          res.render('recipe_form', {
+            title: 'Update Recipe: ' + recipe.name,
+            categories: list_categories,
+            recipe,
+            errors,
+          });
+        });
+
+      // Also delete the multer upload if there was one, to prevent orphan files being saved to disk when nothing is being stored to the collection.
+      if (req.file) {
+        fs.unlink(req.file.path, (err) => {
+          if (err) {
+            return next(err);
+          }
+          console.log('File deleted: ' + req.file.originalname);
+        });
+      }
+      return;
+    }
+    // Data from form is valid
+    // Update the record
+    console.log('Data valid. Updating: ' + req.params.id);
+    Recipe.findByIdAndUpdate(
+      req.params.id,
+      recipe,
+      {},
+      (err, therecipe) => {
+        if (err) {
+          return next(err);
+        }
+        // Recipe has been saved. Redirect to its detail page
+        res.redirect(therecipe.url);
+      } // ends async optional callback
+    ); // ends async.series
+  }, // ends controller callback
+];

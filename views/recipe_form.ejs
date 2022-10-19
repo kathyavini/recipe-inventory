@@ -41,14 +41,13 @@
             id="name"
             name="name"
             placeholder="Name"
-            value="<%= locals.recipe ? recipe.name : '' %>"/>
+            value="<%- locals.recipe ? recipe.name : '' %>"/>
         
         <label for="description">Recipe Description: (optional) </label>
         <textarea
             id="description"
             name="description"
-            placeholder="Description"
-            value="<%= locals.recipe ? recipe.description : '' %>"></textarea>
+            placeholder="Description"><%- locals.recipe ? recipe.description : '' %></textarea>
 
         <label for="ingredients">Recipe Ingredients: *
             <p>Please begin each ingredient on its own line and start each line with a dash</p>
@@ -56,9 +55,9 @@
         <textarea
             id="ingredients"
             name="ingredients"
-            placeholder="<%=`- 1 red onion
+            placeholder="<%-`- 1 red onion
 - 4 cloves of garlic`%>"
-            rows="8"><%= locals.recipe ? '- ' + recipe.ingredients.join('\r\n\- ') : '' %></textarea>
+            rows="8"><%- locals.recipe ? '- ' + recipe.ingredients.join('\r\n\- ') : '' %></textarea>
 
         <label for="steps">Recipe Steps: *
             <p>Please begin each step on its own line and start each line with a dash</p>
@@ -66,7 +65,7 @@
         <textarea
             id="steps"
             name="steps"
-            placeholder="<%=`- chop the onions and garlic
+            placeholder="<%-`- chop the onions and garlic
 - heat oil in the pan`%>"
             rows="8"><%= locals.recipe ? '- ' + recipe.steps.join('\r\n\- ') : '' %></textarea>
         
@@ -74,16 +73,16 @@
         </label>
         <input
             id="source-link"
-            name="source-link"
+            name="sourceLink"
             placeholder="e.g. https://minimalistbaker.com/easy-tofu-pad-thai/"
-            value="<%= locals.recipe ? recipe.sourceLink : '' %>"/>
+            value="<%- locals.recipe ? recipe.sourceLink : '' %>"/>
 
-        <label for="sourceText">Source link text (optional): </label>
+        <label for="source-text">Source link text (optional): </label>
         <input
             id="source-text"
-            name="source-text"
+            name="sourceText"
             placeholder="e.g. Easy Tofu Pad Thai - Minimalist Baker"
-            value="<%= locals.recipe ? recipe.sourceText : '' %>"/>
+            value="<%- locals.recipe ? recipe.sourceText : '' %>"/>
         
         <fieldset class="options" for="categories">
             <legend>Choose categories: </legend>
@@ -102,11 +101,13 @@
             <% }); %>
         </fieldset>
 
+        
         <label for="recipe-image">Upload an image for your recipe: * </label>
         <input
             type="file"
             name="recipeImage"
             accept="image/*"/>
+
         <button>Submit</button>
       </form>
 

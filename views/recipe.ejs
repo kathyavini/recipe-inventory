@@ -22,7 +22,7 @@
       </div>
     </header>
     <main class="recipe">
-      <h1><%= title %></h1>
+      <h1><%- title %></h1>
 
       <h2>
         <% recipe.categories.forEach(function (tag, index) { %>
@@ -33,30 +33,31 @@
 
       <img src="/images/<%=recipe.image%>" />
 
-      <p><%= recipe.description %></p>
+      <p><%- recipe.description %></p>
 
       <% if(recipe.sourceLink) { %>
-        <p>Link to original recipe: <a href="<%=  recipe.sourceLink %>">
-          <%= recipe.sourceText %></a>
+        <p>Link to original recipe: <a href="<%-  recipe.sourceLink %>">
+          <%- recipe.sourceText %></a>
         </p>
       <% }; %>
 
       <h2>Ingredients:</h2>
       <ul>
         <% recipe.ingredients.forEach(function (ingredient) { %>
-          <li><%= ingredient %></li>
+          <li><%- ingredient %></li>
         <% }); %>
       </ul>
 
       <h2>Steps:</h2>
       <ol>
         <% recipe.steps.forEach(function (step) { %>
-          <li><%= step %></li>
+          <li><%- step %></li>
         <% }); %>
       </ol>
     </main>
     <footer>
       <p><a href="<%=recipe.url + '/delete'%>">Delete this recipe</a></p>
+      <p><a href="<%=recipe.url + '/update'%>">Edit this recipe</a></p>
     </footer>
   </body>
 </html>

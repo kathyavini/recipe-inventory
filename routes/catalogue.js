@@ -55,7 +55,11 @@ router.post('/recipe/:id/delete', recipe_controller.recipe_delete_post);
 router.get('/recipe/:id/update', recipe_controller.recipe_update_get);
 
 // POST request to update Recipe.
-router.post('/recipe/:id/update', recipe_controller.recipe_update_post);
+router.post(
+  '/recipe/:id/update',
+  upload.single('recipeImage'),
+  recipe_controller.recipe_update_post
+);
 
 // GET request for one Recipe.
 router.get('/recipe/:id', recipe_controller.recipe_detail);
@@ -85,7 +89,11 @@ router.post('/category/:id/delete', category_controller.category_delete_post);
 router.get('/category/:id/update', category_controller.category_update_get);
 
 // POST request to update Category.
-router.post('/category/:id/update', category_controller.category_update_post);
+router.post(
+  '/category/:id/update',
+  upload.single('categoryImage'),
+  category_controller.category_update_post
+);
 
 // GET request for one Category.
 router.get('/category/:id', category_controller.category_detail);
