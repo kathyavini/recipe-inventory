@@ -248,11 +248,91 @@ exports.category_delete_post = (req, res, next) => {
 };
 
 // Display Category update form on GET.
-exports.category_update_get = (req, res) => {
-  res.send('NOT IMPLEMENTED: Category update GET');
+exports.category_update_get = (req, res, next) => {
+  // Using async only to keep code in same format as recipe_update_get
+  async.parallel(
+    {
+      category(callback) {
+        Category.findById(req.params.id).exec(callback);
+      },
+    },
+    (err, results) => {
+      if (err) {
+        return next(err);
+      }
+
+      if (results.category == null) {
+        // No results in db
+        const err = new Error('Category not found');
+        err.status = 404;
+        return next(err);
+      }
+
+      // Success
+      res.render('category_form', {
+        title: 'Update Category: ' + results.category.name,
+        category: results.category,
+      });
+    }
+  );
 };
 
 // Handle Category update on POST.
-exports.category_update_post = (req, res) => {
-  res.send('NOT IMPLEMENTED: Category update POST');
-};
+exports.category_update_post = [
+  // Validation and sanitization by express-validator (text field)
+  body('name', 'Category name required').trim().isLength({ min: 1 }).escape(),
+
+  // Process request after validation and sanitization
+  (req, res, next) => {
+    // Extract the express-validator errors
+    const errors = validationResult(req).array();
+
+    if (req.file == undefined) {
+      // Check if req.file exists
+      // This will be empty both when an image isn't uploaded and when an unsupported image format (like webp) is selected by the user but rejected by multer's fileFilter
+      errors.push({
+        msg: 'Please upload an image in .gif, .jpg/.jpeg, or .png format',
+      });
+    }
+
+    // Create a category object with escaped and trimmed data
+    const category = new Category({
+      name: req.body.name,
+      image: req.file == undefined ? '' : req.file.filename,
+      _id: req.params.id,
+    });
+
+    if (errors.length > 0) {
+      // Render the form again with sanitized values and error messages
+      res.render('category_form', {
+        title: 'Create Category',
+        category,
+        errors: errors,
+      });
+
+      // Also delete the multer upload if there was one, to prevent orphan files being saved to disk when nothing is being stored to the collection.
+      if (req.file) {
+        fs.unlink(req.file.path, (err) => {
+          if (err) {
+            return next(err);
+          }
+        });
+      }
+      return;
+    }
+
+    // Data valid; update record
+    Category.findByIdAndUpdate(
+      req.params.id,
+      category,
+      {},
+      (err, thecategory) => {
+        if (err) {
+          return next(err);
+        }
+        // Category has been saved. Redirect to its detail page
+        res.redirect(thecategory.url);
+      }
+    );
+  },
+];

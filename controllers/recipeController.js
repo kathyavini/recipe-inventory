@@ -170,7 +170,6 @@ exports.recipe_create_post = [
           if (err) {
             return next(err);
           }
-          console.log('File deleted: ' + req.file.originalname);
         });
       }
       return;
@@ -209,7 +208,6 @@ exports.recipe_create_post = [
                 if (err) {
                   return next(err);
                 }
-                console.log('File deleted: ' + req.file.originalname);
               });
             }
 
@@ -366,8 +364,6 @@ exports.recipe_update_get = (req, res, next) => {
 exports.recipe_update_post = [
   // Convert the categories checked to an array.
   (req, res, next) => {
-    console.log('Array actions. Acting on: ');
-    console.log(req.body);
     if (!Array.isArray(req.body.categories)) {
       req.body.categories =
         typeof req.body.categories === 'undefined' ? [] : [req.body.categories];
@@ -402,8 +398,6 @@ exports.recipe_update_post = [
 
   // Process request after validation and sanitization
   (req, res, next) => {
-    console.log('Received request: ');
-    console.log(req.body);
     // Extract the express-validator errors
     const errors = validationResult(req).array();
 
@@ -462,9 +456,6 @@ exports.recipe_update_post = [
             }
           }
 
-          console.log('Data invalid. Repopulating form with object: ');
-          console.log(recipe);
-
           res.render('recipe_form', {
             title: 'Update Recipe: ' + recipe.name,
             categories: list_categories,
@@ -479,25 +470,17 @@ exports.recipe_update_post = [
           if (err) {
             return next(err);
           }
-          console.log('File deleted: ' + req.file.originalname);
         });
       }
       return;
     }
-    // Data from form is valid
-    // Update the record
-    console.log('Data valid. Updating: ' + req.params.id);
-    Recipe.findByIdAndUpdate(
-      req.params.id,
-      recipe,
-      {},
-      (err, therecipe) => {
-        if (err) {
-          return next(err);
-        }
-        // Recipe has been saved. Redirect to its detail page
-        res.redirect(therecipe.url);
-      } // ends async optional callback
-    ); // ends async.series
-  }, // ends controller callback
+    // Data from form is valid; update the record
+    Recipe.findByIdAndUpdate(req.params.id, recipe, {}, (err, therecipe) => {
+      if (err) {
+        return next(err);
+      }
+      // Recipe has been saved. Redirect to its detail page
+      res.redirect(therecipe.url);
+    });
+  },
 ];
