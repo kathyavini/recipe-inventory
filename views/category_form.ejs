@@ -43,11 +43,26 @@
             placeholder="Descriptive name"
             value="<%= locals.category ? category.name : '' %>"/>
         
-        <label for="category-image">Upload an image for your category (required): </label>
-        <input
+            <% if (locals.category && category.image) { %>
+              <h3>Image preview</h3>
+              <img class="image-preview" src="/images/<%=category.image%>"/>
+              <input
+              type="hidden"
+              name="imagePath"
+              value="<%= category.image %>"/>
+    
+              <label for="category-image">Upload a different image: </label>
+            <% } else { %>
+              <label for="category-image">Upload an image for your category (required):  </label>
+            <% }; %>
+
+            <input
+            id="category-image"
             type="file"
             name="categoryImage"
             accept="image/*"/>
+
+
         <button>Submit</button>
       </form>
       

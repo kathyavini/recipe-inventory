@@ -4,6 +4,8 @@ const async = require('async');
 const { body, validationResult } = require('express-validator');
 const fs = require('fs');
 
+const updateImage = require('../utils/forms/updateImage');
+
 // Display list of all Categories.
 exports.category_list = (req, res, next) => {
   Category.find({}, 'name image')
@@ -65,14 +67,12 @@ exports.category_create_post = [
   // Validation and sanitization by express-validator (text field)
   body('name', 'Category name required').trim().isLength({ min: 1 }).escape(),
 
-  // Process request after validation and sanitization
   (req, res, next) => {
     // Extract the express-validator errors
     const errors = validationResult(req).array();
 
-    if (req.file == undefined) {
-      // Check if req.file exists
-      // This will be empty both when an image isn't uploaded and when an unsupported image format (like webp) is selected by the user but rejected by multer's fileFilter
+    if (!req.body.imagePath && req.file == undefined) {
+      // req.file will be undefined if no image is selected or if an unsupported image format (webp) is selected and rejected by multer's fileFilter
       errors.push({
         msg: 'Please upload an image in .gif, .jpg/.jpeg, or .png format',
       });
@@ -81,7 +81,7 @@ exports.category_create_post = [
     // Create a category object with escaped and trimmed data
     const category = new Category({
       name: req.body.name,
-      image: req.file == undefined ? '' : req.file.filename,
+      image: updateImage(req.body.imagePath, req.file),
     });
 
     if (errors.length > 0) {
@@ -91,19 +91,11 @@ exports.category_create_post = [
         category,
         errors: errors,
       });
-
-      // Also delete the multer upload if there was one, to prevent orphan files being saved to disk when nothing is being stored to the collection.
-      if (req.file) {
-        fs.unlink(req.file.path, (err) => {
-          if (err) {
-            return next(err);
-          }
-        });
-      }
       return;
     } else {
       // Data from form is valid
-      // Check with category with the same name already exists
+
+      // Check if category with the same name already exists
       Category.findOne({ name: req.body.name }).exec((err, found_category) => {
         if (err) {
           return next(err);
@@ -120,14 +112,6 @@ exports.category_create_post = [
             errors: errors,
           });
 
-          // Also delete the multer upload if there was one, to prevent orphan files being saved to disk when nothing is being stored to the collection.
-          if (req.file) {
-            fs.unlink(req.file.path, (err) => {
-              if (err) {
-                return next(err);
-              }
-            });
-          }
           return;
         } else {
           // Save new data to the collection
@@ -186,38 +170,7 @@ exports.category_delete_post = (req, res, next) => {
         return next(err);
       }
 
-      // Check for use of image in other categories and images; otherwise delete
-      // Note: this won't apply to uploaded images are they are given unique ids
-      async.parallel(
-        {
-          imgCategories(imgCb) {
-            Category.find({ image: results.category.image }).exec(imgCb);
-          },
-          imgRecipes(imgCb) {
-            Recipe.find({ image: results.category.image }).exec(imgCb);
-          },
-        },
-        (err, imgResults) => {
-          if (err) {
-            return next(err);
-          }
-
-          if (
-            imgResults.imgCategories.length == 1 &&
-            imgResults.imgRecipes.length == 0
-          ) {
-            // image is in use by no other objects and can be deleted
-            fs.unlink(`public/images/${results.category.image}`, (err) => {
-              if (err) {
-                // Not a big issue if the image deletion fails; just log it
-                console.log(err);
-              }
-            });
-          }
-        }
-      );
-
-      // Delete category and its references
+      // Delete category and its references from database
       async.parallel(
         {
           delete_category(deleteCb) {
@@ -239,6 +192,14 @@ exports.category_delete_post = (req, res, next) => {
             return next(err);
           }
 
+          // Delete category image
+          fs.unlink(`public/images/${results.category.image}`, (err) => {
+            if (err) {
+              // Not a big issue if the image deletion fails; just log it
+              console.log(err);
+            }
+          });
+
           // Success - go to category list
           res.redirect('/catalogue/categories');
         }
@@ -249,7 +210,6 @@ exports.category_delete_post = (req, res, next) => {
 
 // Display Category update form on GET.
 exports.category_update_get = (req, res, next) => {
-  // Using async only to keep code in same format as recipe_update_get
   async.parallel(
     {
       category(callback) {
@@ -279,17 +239,14 @@ exports.category_update_get = (req, res, next) => {
 
 // Handle Category update on POST.
 exports.category_update_post = [
-  // Validation and sanitization by express-validator (text field)
   body('name', 'Category name required').trim().isLength({ min: 1 }).escape(),
 
-  // Process request after validation and sanitization
   (req, res, next) => {
     // Extract the express-validator errors
     const errors = validationResult(req).array();
 
-    if (req.file == undefined) {
-      // Check if req.file exists
-      // This will be empty both when an image isn't uploaded and when an unsupported image format (like webp) is selected by the user but rejected by multer's fileFilter
+    if (!req.body.imagePath && req.file == undefined) {
+      // req.file will be undefined if no image is selected or if an unsupported image format (webp) is selected and rejected by multer's fileFilter
       errors.push({
         msg: 'Please upload an image in .gif, .jpg/.jpeg, or .png format',
       });
@@ -298,7 +255,7 @@ exports.category_update_post = [
     // Create a category object with escaped and trimmed data
     const category = new Category({
       name: req.body.name,
-      image: req.file == undefined ? '' : req.file.filename,
+      image: updateImage(req.body.imagePath, req.file),
       _id: req.params.id,
     });
 
@@ -310,14 +267,6 @@ exports.category_update_post = [
         errors: errors,
       });
 
-      // Also delete the multer upload if there was one, to prevent orphan files being saved to disk when nothing is being stored to the collection.
-      if (req.file) {
-        fs.unlink(req.file.path, (err) => {
-          if (err) {
-            return next(err);
-          }
-        });
-      }
       return;
     }
 

@@ -57,7 +57,7 @@
             name="ingredients"
             placeholder="<%-`- 1 red onion
 - 4 cloves of garlic`%>"
-            rows="8"><%- locals.recipe ? '- ' + recipe.ingredients.join('\r\n\- ') : '' %></textarea>
+            rows="8"><%- locals.recipe && recipe.ingredients.length > 0 ? '- ' + recipe.ingredients.join('\r\n\- ') : '' %></textarea>
 
         <label for="steps">Recipe Steps: *
             <p>Please begin each step on its own line and start each line with a dash</p>
@@ -67,7 +67,7 @@
             name="steps"
             placeholder="<%-`- chop the onions and garlic
 - heat oil in the pan`%>"
-            rows="8"><%= locals.recipe ? '- ' + recipe.steps.join('\r\n\- ') : '' %></textarea>
+            rows="8"><%= locals.recipe && recipe.steps.length > 0 ? '- ' + recipe.steps.join('\r\n\- ') : '' %></textarea>
         
         <label for="source-link">Link to original source for the recipe (if applicable):
         </label>

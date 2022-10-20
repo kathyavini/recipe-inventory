@@ -4,6 +4,9 @@ const async = require('async');
 const { body, validationResult } = require('express-validator');
 const fs = require('fs');
 
+const updateImage = require('../utils/forms/updateImage');
+const processTextArea = require('../utils/forms/processTextArea');
+
 // Display list of all Recipes.
 exports.recipe_list = (req, res, next) => {
   Recipe.find({}, 'name description image categories')
@@ -103,48 +106,9 @@ exports.recipe_create_post = [
     const errors = validationResult(req).array();
 
     if (!req.body.imagePath && req.file == undefined) {
-      // Check if req.file exists
-      // This will be empty both when an image isn't uploaded and when an unsupported image format (like webp) is selected by the user but rejected by multer's fileFilter
       errors.push({
         msg: 'Please upload an image in .gif, .jpg/.jpeg, or .png format',
       });
-    }
-
-    // Process text area input separated by new line + dash into arrays of strings
-    const processTextArea = (string) => {
-      // Split on newline
-      let listArray = string.split(/\r?\n/);
-
-      const trimmedArray = listArray.map((line) => {
-        // Remove leading dash and space (if included)
-        return line.replace(/[-][ ]?/, '');
-      });
-
-      return trimmedArray;
-    };
-
-    // Get image path from previous upload or create new one
-    let imagePath;
-
-    if (req.body.imagePath && req.file == undefined) {
-      imagePath = req.body.imagePath;
-    } else if (req.body.imagePath && req.file) {
-      // Update image
-      imagePath = req.file.filename;
-      // And delete previous image
-      fs.unlink(`public/images/${req.body.imagePath}`, (err) => {
-        if (err) {
-          // Don't pass to next() if this errors; just console.log it
-          console.log(err);
-        }
-        console.log('Deleting previous upload: ' + req.body.imagePath);
-      });
-    } else if (!req.body.imagePath && req.file == undefined) {
-      // No file and nothing loaded -- error message will display
-      imagePath = '';
-    } else {
-      // No loaded file but new uploaded file
-      imagePath = req.file.filename;
     }
 
     // Create a recipe object with escaped and trimmed data
@@ -159,7 +123,7 @@ exports.recipe_create_post = [
       sourceLink: req.body.sourceLink,
       sourceText: req.body.sourceText,
       categories: req.body.categories,
-      image: imagePath,
+      image: updateImage(req.body.imagePath, req.file),
     });
 
     if (errors.length > 0) {
@@ -280,42 +244,19 @@ exports.recipe_delete_post = (req, res, next) => {
         return next(err);
       }
 
-      // Check for use of image in other categories and images; otherwise delete
-      // Note: this won't apply to uploaded images are they are given unique ids
-      async.parallel(
-        {
-          imgCategories(imgCb) {
-            Category.find({ image: results.recipe.image }).exec(imgCb);
-          },
-          imgRecipes(imgCb) {
-            Recipe.find({ image: results.recipe.image }).exec(imgCb);
-          },
-        },
-        (err, imgResults) => {
-          if (err) {
-            return next(err);
-          }
-
-          if (
-            imgResults.imgCategories.length == 0 &&
-            imgResults.imgRecipes.length == 1
-          ) {
-            // image is in use by no other objects and can be deleted
-            fs.unlink(`public/images/${results.recipe.image}`, (err) => {
-              if (err) {
-                // Not a big issue if the image deletion fails; just log it
-                console.log(err);
-              }
-            });
-          }
-        }
-      );
-
       // Delete recipe
       Recipe.findByIdAndRemove(req.body.recipeid, (err) => {
         if (err) {
           return next(err);
         }
+
+        // Delete recipe image
+        fs.unlink(`public/images/${results.recipe.image}`, (err) => {
+          if (err) {
+            // Not a big issue if the image deletion fails; just log it
+            console.log(err);
+          }
+        });
 
         // Success - go to recipe list
         res.redirect('/catalogue/recipes');
@@ -414,43 +355,6 @@ exports.recipe_update_post = [
       });
     }
 
-    // Process text area input separated by new line + dash into arrays of strings
-    const processTextArea = (string) => {
-      // Split on newline
-      let listArray = string.split(/\r?\n/);
-
-      const trimmedArray = listArray.map((line) => {
-        // Remove leading dash and space (if included)
-        return line.replace(/[-][ ]?/, '');
-      });
-
-      return trimmedArray;
-    };
-
-    // Get image path from previous upload or create new one
-    let imagePath;
-
-    if (req.body.imagePath && req.file == undefined) {
-      imagePath = req.body.imagePath;
-    } else if (req.body.imagePath && req.file) {
-      // Update image
-      imagePath = req.file.filename;
-      // And delete previous image
-      fs.unlink(`public/images/${req.body.imagePath}`, (err) => {
-        if (err) {
-          // Don't pass to next() if this errors; just console.log it
-          console.log(err);
-        }
-        console.log('Deleting previous upload: ' + req.body.imagePath);
-      });
-    } else if (!req.body.imagePath && req.file == undefined) {
-      // No file and nothing loaded -- error message will display
-      imagePath = '';
-    } else {
-      // No loaded file but new uploaded file
-      imagePath = req.file.filename;
-    }
-
     // Create a recipe object with escaped and trimmed data
     const recipe = new Recipe({
       name: req.body.name,
@@ -463,7 +367,7 @@ exports.recipe_update_post = [
       sourceLink: req.body.sourceLink,
       sourceText: req.body.sourceText,
       categories: req.body.categories,
-      image: imagePath,
+      image: updateImage(req.body.imagePath, req.file),
       _id: req.params.id, //This is required, or a new ID will be assigned!
     });
 
@@ -484,6 +388,9 @@ exports.recipe_update_post = [
               category.checked = true;
             }
           }
+
+          console.log(recipe);
+          console.log(recipe.ingredients.length);
 
           res.render('recipe_form', {
             title: 'Update Recipe: ' + recipe.name,
