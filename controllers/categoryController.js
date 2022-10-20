@@ -143,70 +143,112 @@ exports.category_delete_get = (req, res, next) => {
       if (err) {
         return next(err);
       }
+
       if (results.category == null) {
         // No results.
         res.redirect('/catalogue/categories');
       }
+
       // Successful, so render.
       res.render('category_delete', {
         title: `Delete Category: ${results.category.name}`,
         category: results.category,
         recipes: results.category_recipes,
+        destructive: true,
       });
     }
   );
 };
 
 // Handle Category delete on POST.
-exports.category_delete_post = (req, res, next) => {
-  async.parallel(
-    {
-      category(callback) {
-        Category.findById(req.body.categoryid).exec(callback);
-      },
-    },
-    (err, results) => {
-      if (err) {
-        return next(err);
-      }
+exports.category_delete_post = [
+  // Validate password
+  body('adminPassword', 'Admin password is required for deletion')
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
 
-      // Delete category and its references from database
+  (req, res, next) => {
+    // Extract the express-validator errors
+    const errors = validationResult(req).array();
+
+    // Check if admin password is correct
+    if (
+      req.body.adminPassword &&
+      req.body.adminPassword !== process.env.adminPassword
+    ) {
+      errors.push({
+        msg: 'Admin password incorrect',
+      });
+    }
+
+    if (errors.length > 0) {
+      // If password missing or incorrect, render the form again with error messages
       async.parallel(
         {
-          delete_category(deleteCb) {
-            Category.findByIdAndRemove(req.body.categoryid).exec(deleteCb);
+          category(callback) {
+            Category.findById(req.params.id).exec(callback);
           },
-          delete_references(deleteCb) {
-            Recipe.updateMany(
-              { categories: req.body.categoryid },
-              {
-                $pullAll: {
-                  categories: [req.body.categoryid],
-                },
-              }
-            ).exec(deleteCb);
+          category_recipes(callback) {
+            Recipe.find({ categories: req.params.id }).exec(callback);
           },
         },
-        (err) => {
+        (err, results) => {
           if (err) {
             return next(err);
           }
+          if (results.category == null) {
+            res.redirect('/catalogue/categories');
+          }
 
-          // Delete category image
-          fs.unlink(`public/images/${results.category.image}`, (err) => {
-            if (err) {
-              // Not a big issue if the image deletion fails; just log it
-              console.log(err);
-            }
+          res.render('category_delete', {
+            title: `Delete Category: ${results.category.name}`,
+            category: results.category,
+            recipes: results.category_recipes,
+            errors,
+            destructive: true,
           });
-
-          // Success - go to category list
-          res.redirect('/catalogue/categories');
         }
       );
+      return;
     }
-  );
-};
+
+    // No password errors so delete category and its references from database
+    async.parallel(
+      {
+        delete_category(deleteCb) {
+          Category.findByIdAndRemove(req.body.categoryid).exec(deleteCb);
+        },
+        delete_references(deleteCb) {
+          Recipe.updateMany(
+            { categories: req.body.categoryid },
+            {
+              $pullAll: {
+                categories: [req.body.categoryid],
+              },
+            }
+          ).exec(deleteCb);
+        },
+      },
+      (err, results) => {
+        if (err) {
+          return next(err);
+        }
+
+        // Delete category image
+        fs.unlink(`public/images/${results.delete_category.image}`, (err) => {
+          if (err) {
+            // Not a big issue if the image deletion fails; just log it
+            console.log(err);
+          }
+        });
+
+        // Success - go to category list
+        res.redirect('/catalogue/categories');
+      }
+    );
+  },
+];
 
 // Display Category update form on GET.
 exports.category_update_get = (req, res, next) => {
@@ -232,6 +274,7 @@ exports.category_update_get = (req, res, next) => {
       res.render('category_form', {
         title: 'Update Category: ' + results.category.name,
         category: results.category,
+        destructive: true,
       });
     }
   );
@@ -241,9 +284,24 @@ exports.category_update_get = (req, res, next) => {
 exports.category_update_post = [
   body('name', 'Category name required').trim().isLength({ min: 1 }).escape(),
 
+  body('adminPassword', 'Admin password is required for update')
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+
   (req, res, next) => {
     // Extract the express-validator errors
     const errors = validationResult(req).array();
+
+    // Check if admin password is correct
+    if (
+      req.body.adminPassword &&
+      req.body.adminPassword !== process.env.adminPassword
+    ) {
+      errors.push({
+        msg: 'Admin password incorrect',
+      });
+    }
 
     if (!req.body.imagePath && req.file == undefined) {
       // req.file will be undefined if no image is selected or if an unsupported image format (webp) is selected and rejected by multer's fileFilter
@@ -262,9 +320,10 @@ exports.category_update_post = [
     if (errors.length > 0) {
       // Render the form again with sanitized values and error messages
       res.render('category_form', {
-        title: 'Create Category',
+        title: 'Update Category: ' + category.name,
         category,
         errors: errors,
+        destructive: true,
       });
 
       return;

@@ -30,7 +30,7 @@
                 <div class="recipe-top">
                     <img src="/images/<%=recipe.image%>"/>
                     <div>
-                        <h2><%= recipe.name%></h2>
+                        <h2><%- recipe.name%></h2>
                     </div>
                 </div>
                 <div class="recipe-text"> 
@@ -40,11 +40,11 @@
                             None
                           <% }; %>
                         <% recipe.categories.forEach(function (tag, index) { %>
-                        <%= index == 0 ? '' : '• ' %><%= tag.name%>
+                        <%= index == 0 ? '' : '• ' %><%- tag.name %>
                         <% }); %>
                         </span>
                     </p>
-                    <!-- <p><%= recipe.description%></p> -->
+                    <!-- <p><%- recipe.description%></p> -->
                 </div>
             </div>
           </a>

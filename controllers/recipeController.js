@@ -226,44 +226,79 @@ exports.recipe_delete_get = (req, res, next) => {
       res.render('recipe_delete', {
         title: `Delete Recipe: ${results.recipe.name}`,
         recipe: results.recipe,
+        destructive: true,
       });
     }
   );
 };
 
 // Handle Recipe delete on POST.
-exports.recipe_delete_post = (req, res, next) => {
-  async.parallel(
-    {
-      recipe(callback) {
-        Recipe.findById(req.body.recipeid).exec(callback);
-      },
-    },
-    (err, results) => {
-      if (err) {
-        return next(err);
-      }
+exports.recipe_delete_post = [
+  // Validate password
+  body('adminPassword', 'Admin password is required for deletion')
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
 
-      // Delete recipe
-      Recipe.findByIdAndRemove(req.body.recipeid, (err) => {
+  (req, res, next) => {
+    // Extract the express-validator errors
+    const errors = validationResult(req).array();
+
+    // Check if admin password is correct
+    if (
+      req.body.adminPassword &&
+      req.body.adminPassword !== process.env.adminPassword
+    ) {
+      errors.push({
+        msg: 'Admin password incorrect',
+      });
+    }
+
+    async.parallel(
+      {
+        recipe(callback) {
+          Recipe.findById(req.body.recipeid).exec(callback);
+        },
+      },
+      (err, results) => {
         if (err) {
           return next(err);
         }
 
-        // Delete recipe image
-        fs.unlink(`public/images/${results.recipe.image}`, (err) => {
-          if (err) {
-            // Not a big issue if the image deletion fails; just log it
-            console.log(err);
-          }
-        });
+        if (errors.length > 0) {
+          // If password is missing or incorrect, render the delete form again with error messages
 
-        // Success - go to recipe list
-        res.redirect('/catalogue/recipes');
-      });
-    }
-  );
-};
+          res.render('recipe_delete', {
+            title: `Delete Recipe: ${results.recipe.name}`,
+            recipe: results.recipe,
+            errors,
+            destructive: true,
+          });
+
+          return;
+        }
+
+        // Delete recipe
+        Recipe.findByIdAndRemove(req.body.recipeid, (err) => {
+          if (err) {
+            return next(err);
+          }
+
+          // Delete recipe image
+          fs.unlink(`public/images/${results.recipe.image}`, (err) => {
+            if (err) {
+              // Not a big issue if the image deletion fails; just log it
+              console.log(err);
+            }
+          });
+
+          // Success - go to recipe list
+          res.redirect('/catalogue/recipes');
+        });
+      }
+    );
+  },
+];
 
 // Display Recipe update form on GET.
 exports.recipe_update_get = (req, res, next) => {
@@ -301,6 +336,7 @@ exports.recipe_update_get = (req, res, next) => {
         title: 'Update Recipe: ' + results.recipe.name,
         categories: results.categories,
         recipe: results.recipe,
+        destructive: true,
       });
     }
   );
@@ -342,10 +378,25 @@ exports.recipe_update_post = [
 
   body('categories.*').escape(),
 
+  body('adminPassword', 'Admin password is required for update')
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+
   // Process request after validation and sanitization
   (req, res, next) => {
     // Extract the express-validator errors
     const errors = validationResult(req).array();
+
+    // Check if admin password is correct
+    if (
+      req.body.adminPassword &&
+      req.body.adminPassword !== process.env.adminPassword
+    ) {
+      errors.push({
+        msg: 'Admin password incorrect',
+      });
+    }
 
     if (!req.body.imagePath && req.file == undefined) {
       // Check if req.file exists
@@ -389,14 +440,12 @@ exports.recipe_update_post = [
             }
           }
 
-          console.log(recipe);
-          console.log(recipe.ingredients.length);
-
           res.render('recipe_form', {
             title: 'Update Recipe: ' + recipe.name,
             categories: list_categories,
             recipe,
             errors,
+            destructive: true,
           });
         });
 
