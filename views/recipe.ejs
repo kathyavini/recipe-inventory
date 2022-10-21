@@ -1,32 +1,14 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Calistoga&family=Open+Sans:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
-    <meta name="viewport" content="width=device-width initial-scale=1" />
-    <title><%- title %></title>
-    <link rel="stylesheet" href="/stylesheets/style.css" />
-  </head>
+  <%- include("head") %>
   <body>
-    <header>
-      <div class="logo">
-        <a href="/"><h2>Odin<span class="blue">Recipes</span></a></h2>
-      </div>
-      <div class="links">
-        <h3><a href="/catalogue/recipes">Recipes</a></h3>
-        <h3><a href="/catalogue/categories">Categories</a></h3>
-      </div>
-    </header>
+    <%- include("header") %>
     <main class="recipe">
       <h1><%- title %></h1>
 
       <h2>
-        <% recipe.categories.forEach(function (category, index) { %>
-        <%= index == 0 ? '' : '• ' %>
+        <% recipe.categories.forEach(function (category, index) { %> <%= index
+        == 0 ? '' : '• ' %>
         <a href="<%=category.url %>"><%- category.name %></a>
         <% }); %>
       </h2>
@@ -36,22 +18,23 @@
       <p><%- recipe.description %></p>
 
       <% if(recipe.sourceLink) { %>
-        <p>Link to original recipe: <a href="<%-  recipe.sourceLink %>">
-          <%- recipe.sourceText %></a>
-        </p>
+      <p>
+        Link to original recipe:
+        <a href="<%-  recipe.sourceLink %>"> <%- recipe.sourceText %></a>
+      </p>
       <% }; %>
 
       <h2>Ingredients:</h2>
       <ul>
         <% recipe.ingredients.forEach(function (ingredient) { %>
-          <li><%- ingredient %></li>
+        <li><%- ingredient %></li>
         <% }); %>
       </ul>
 
       <h2>Steps:</h2>
       <ol>
         <% recipe.steps.forEach(function (step) { %>
-          <li><%- step %></li>
+        <li><%- step %></li>
         <% }); %>
       </ol>
     </main>

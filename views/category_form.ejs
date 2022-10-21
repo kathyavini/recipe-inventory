@@ -1,81 +1,52 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Calistoga&family=Open+Sans:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
-    <meta name="viewport" content="width=device-width initial-scale=1" />
-    <title><%- title %></title>
-    <link rel="stylesheet" href="/stylesheets/style.css" />
-  </head>
+  <%- include("head") %>
   <body>
-    <header>
-      <div class="logo">
-        <a href="/"><h2>Odin<span class="blue">Recipes</span></a></h2>
-      </div>
-      <div class="links">
-        <h3><a href="/catalogue/recipes">Recipes</a></h3>
-        <h3><a href="/catalogue/categories">Categories</a></h3>
-      </div>
-    </header>
+    <%- include("header") %>
     <main class="recipe">
       <h1><%- title %></h1>
 
       <h3>All fields are required.</h3>
 
-      <% if (locals.errors) { %>
-        <% errors.forEach(function (error) { %>
-            <p class="validation-messages">
-                <%= error.msg %>
-            </p>
-        <% }); %>
-      <% }; %>
+      <% if (locals.errors) { %> <% errors.forEach(function (error) { %>
+      <p class="validation-messages"><%= error.msg %></p>
+      <% }); %> <% }; %>
 
       <form method="POST" action="" encType="multipart/form-data">
-        
         <label for="name">Category Name: </label>
         <input
-            id="name"
-            name="name"
-            placeholder="Descriptive name"
-            value="<%- locals.category ? category.name : '' %>"/>
-        
-            <% if (locals.category && category.image) { %>
-              <h3>Image preview</h3>
-              <img class="image-preview" src="/images/<%=category.image%>"/>
-              <input
-              type="hidden"
-              name="imagePath"
-              value="<%= category.image %>"/>
-    
-              <label for="category-image">Upload a different image: </label>
-            <% } else { %>
-              <label for="category-image">Upload an image for your category (required):  </label>
-            <% }; %>
+          id="name"
+          name="name"
+          placeholder="Descriptive name"
+          value="<%- locals.category ? category.name : '' %>"
+        />
 
-            <input
-            id="category-image"
-            type="file"
-            name="categoryImage"
-            accept="image/*"/>
+        <% if (locals.category && category.image) { %>
+        <h3>Image preview</h3>
+        <img class="image-preview" src="/images/<%=category.image%>" />
+        <input type="hidden" name="imagePath" value="<%= category.image %>" />
 
-            <% if (locals.destructive) { %>
-              <label
-                for="admin-password">Admin password: *</label>
-              <input
-                id="admin-password"
-                type="password"
-                name="adminPassword"
-              />
-            <% }; %>
+        <label for="category-image">Upload a different image: </label>
+        <% } else { %>
+        <label for="category-image"
+          >Upload an image for your category (required):
+        </label>
+        <% }; %>
 
+        <input
+          id="category-image"
+          type="file"
+          name="categoryImage"
+          accept="image/*"
+        />
+
+        <% if (locals.destructive) { %>
+        <label for="admin-password">Admin password: *</label>
+        <input id="admin-password" type="password" name="adminPassword" />
+        <% }; %>
 
         <button>Submit</button>
       </form>
-      
     </main>
   </body>
 </html>

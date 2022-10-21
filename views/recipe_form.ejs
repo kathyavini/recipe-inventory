@@ -1,140 +1,120 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Calistoga&family=Open+Sans:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
-    <meta name="viewport" content="width=device-width initial-scale=1" />
-    <title><%- title %></title>
-    <link rel="stylesheet" href="/stylesheets/style.css" />
-  </head>
+  <%- include("head") %>
   <body>
-    <header>
-      <div class="logo">
-        <a href="/"><h2>Odin<span class="blue">Recipes</span></a></h2>
-      </div>
-      <div class="links">
-        <h3><a href="/catalogue/recipes">Recipes</a></h3>
-        <h3><a href="/catalogue/categories">Categories</a></h3>
-      </div>
-    </header>
+    <%- include("header") %>
     <main class="recipe">
       <h1><%- title %></h1>
 
       <h3>Required fields are marked with a *.</h3>
 
-      <% if (locals.errors) { %>
-        <% errors.forEach(function (error) { %>
-            <p class="validation-messages">
-                <%= error.msg %>
-            </p>
-        <% }); %>
-      <% }; %>
+      <% if (locals.errors) { %> <% errors.forEach(function (error) { %>
+      <p class="validation-messages"><%= error.msg %></p>
+      <% }); %> <% }; %>
 
       <form method="POST" action="" encType="multipart/form-data">
-        
         <label for="name">Recipe Name: *</label>
         <input
-            id="name"
-            name="name"
-            placeholder="Name"
-            value="<%- locals.recipe ? recipe.name : '' %>"/>
-        
+          id="name"
+          name="name"
+          placeholder="Name"
+          value="<%- locals.recipe ? recipe.name : '' %>"
+        />
+
         <label for="description">Recipe Description: (optional) </label>
-        <textarea
-            id="description"
-            name="description"
-            placeholder="Description"><%- locals.recipe ? recipe.description : '' %></textarea>
+        <textarea id="description" name="description" placeholder="Description">
+<%- locals.recipe ? recipe.description : '' %></textarea
+        >
 
-        <label for="ingredients">Recipe Ingredients: *
-            <p>Please begin each ingredient on its own line and start each line with a dash</p>
+        <label for="ingredients"
+          >Recipe Ingredients: *
+          <p>
+            Please begin each ingredient on its own line and start each line
+            with a dash
+          </p>
         </label>
         <textarea
-            id="ingredients"
-            name="ingredients"
-            placeholder="<%-`- 1 red onion
+          id="ingredients"
+          name="ingredients"
+          placeholder="<%-`- 1 red onion
 - 4 cloves of garlic`%>"
-            rows="8"><%- locals.recipe && recipe.ingredients.length > 0 ? '- ' + recipe.ingredients.join('\r\n\- ') : '' %></textarea>
+          rows="8"
+        >
+<%- locals.recipe && recipe.ingredients.length > 0 ? '- ' + recipe.ingredients.join('\r\n\- ') : '' %></textarea
+        >
 
-        <label for="steps">Recipe Steps: *
-            <p>Please begin each step on its own line and start each line with a dash</p>
+        <label for="steps"
+          >Recipe Steps: *
+          <p>
+            Please begin each step on its own line and start each line with a
+            dash
+          </p>
         </label>
         <textarea
-            id="steps"
-            name="steps"
-            placeholder="<%-`- chop the onions and garlic
+          id="steps"
+          name="steps"
+          placeholder="<%-`- chop the onions and garlic
 - heat oil in the pan`%>"
-            rows="8"><%- locals.recipe && recipe.steps.length > 0 ? '- ' + recipe.steps.join('\r\n\- ') : '' %></textarea>
-        
-        <label for="source-link">Link to original source for the recipe (if applicable):
+          rows="8"
+        >
+<%- locals.recipe && recipe.steps.length > 0 ? '- ' + recipe.steps.join('\r\n\- ') : '' %></textarea
+        >
+
+        <label for="source-link"
+          >Link to original source for the recipe (if applicable):
         </label>
         <input
-            id="source-link"
-            name="sourceLink"
-            placeholder="e.g. https://minimalistbaker.com/easy-tofu-pad-thai/"
-            value="<%- locals.recipe ? recipe.sourceLink : '' %>"/>
+          id="source-link"
+          name="sourceLink"
+          placeholder="e.g. https://minimalistbaker.com/easy-tofu-pad-thai/"
+          value="<%- locals.recipe ? recipe.sourceLink : '' %>"
+        />
 
         <label for="source-text">Source link text (optional): </label>
         <input
-            id="source-text"
-            name="sourceText"
-            placeholder="e.g. Easy Tofu Pad Thai - Minimalist Baker"
-            value="<%- locals.recipe ? recipe.sourceText : '' %>"/>
-        
+          id="source-text"
+          name="sourceText"
+          placeholder="e.g. Easy Tofu Pad Thai - Minimalist Baker"
+          value="<%- locals.recipe ? recipe.sourceText : '' %>"
+        />
+
         <fieldset class="options" for="categories">
-            <legend>Choose categories: </legend>
-            <% categories.forEach(function (category) { %>
-                <div>
-                    <input
-                        type="checkbox"
-                        id="<%= category._id %>"
-                        name="categories"
-                        value="<%= category._id %>"
-                        <%= category.checked ? 'checked' : ''%>
-                    />
-                    <label for="<%= category._id %>"><%- category.name %></label>
-                </div>
-    
-            <% }); %>
+          <legend>Choose categories:</legend>
+          <% categories.forEach(function (category) { %>
+          <div>
+            <input type="checkbox" id="<%= category._id %>" name="categories"
+            value="<%= category._id %>" <%= category.checked ? 'checked' : ''%>
+            />
+            <label for="<%= category._id %>"><%- category.name %></label>
+          </div>
+
+          <% }); %>
         </fieldset>
 
         <% if (locals.recipe && recipe.image) { %>
-          <h3>Image preview</h3>
-          <img class="image-preview" src="/images/<%=recipe.image%>"/>
-          <input
-          type="hidden"
-          name="imagePath"
-          value="<%= recipe.image %>"/>
+        <h3>Image preview</h3>
+        <img class="image-preview" src="/images/<%=recipe.image%>" />
+        <input type="hidden" name="imagePath" value="<%= recipe.image %>" />
 
-          <label for="recipe-image">Upload a different image: </label>
+        <label for="recipe-image">Upload a different image: </label>
         <% } else { %>
-          <label for="recipe-image">Upload an image for your recipe: * </label>
+        <label for="recipe-image">Upload an image for your recipe: * </label>
         <% }; %>
 
         <input
           id="recipe-image"
           type="file"
           name="recipeImage"
-          accept="image/*"/>
-        
+          accept="image/*"
+        />
+
         <% if (locals.destructive) { %>
-          <label
-            for="admin-password">Admin password: *</label>
-          <input
-            id="admin-password"
-            type="password"
-            name="adminPassword"
-          />
+        <label for="admin-password">Admin password: *</label>
+        <input id="admin-password" type="password" name="adminPassword" />
         <% }; %>
 
         <button id="form-submit">Submit</button>
       </form>
-
     </main>
   </body>
-  
-
 </html>

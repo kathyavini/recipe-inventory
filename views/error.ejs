@@ -1,17 +1,8 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Calistoga&family=Open+Sans:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
-    <meta name="viewport" content="width=device-width initial-scale=1" />
-    <title>Error</title>
-    <link rel="stylesheet" href="/stylesheets/style.css" />
-  </head>
+  <%- include("head") %>
   <body>
+    <%- include("header") %>
     <h1><%= message %></h1>
     <h2><%= error.status %></h2>
     <pre><%= error.stack %></pre>
