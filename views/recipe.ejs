@@ -18,10 +18,10 @@
       <p><%- recipe.description %></p>
 
       <% if(recipe.sourceLink) { %>
-      <p>
-        Link to original recipe:
-        <a href="<%-  recipe.sourceLink %>"> <%- recipe.sourceText %></a>
-      </p>
+        <p>
+          Link to original recipe:
+          <a href="<%-  recipe.sourceLink %>"> <%- recipe.sourceText ? recipe.sourceText : recipe.sourceLink%></a>
+        </p>
       <% }; %>
 
       <h2>Ingredients:</h2>

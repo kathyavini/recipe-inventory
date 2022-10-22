@@ -8,9 +8,13 @@
 
       <h3>All fields are required.</h3>
 
-      <% if (locals.errors) { %> <% errors.forEach(function (error) { %>
-      <p class="validation-messages"><%= error.msg %></p>
-      <% }); %> <% }; %>
+      <% if (locals.errors) { %>
+        <% errors.forEach(function (error) { %>
+            <p class="validation-messages">
+                <%= error.msg %>
+            </p>
+        <% }); %>
+      <% }; %>
 
       <form method="POST" action="" encType="multipart/form-data">
         <label for="name">Category Name: </label>
@@ -22,7 +26,7 @@
         />
 
         <% if (locals.category && category.image) { %>
-        <h3>Image preview</h3>
+        <p class="image-preview-label">Image preview</p>
         <img class="image-preview" src="/images/<%=category.image%>" />
         <input type="hidden" name="imagePath" value="<%= category.image %>" />
 

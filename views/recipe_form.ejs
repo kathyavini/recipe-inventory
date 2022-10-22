@@ -6,11 +6,15 @@
     <main class="recipe">
       <h1><%- title %></h1>
 
-      <h3>Required fields are marked with a *.</h3>
+      <h3>Required fields are marked with *</h3>
 
-      <% if (locals.errors) { %> <% errors.forEach(function (error) { %>
-      <p class="validation-messages"><%= error.msg %></p>
-      <% }); %> <% }; %>
+      <% if (locals.errors) { %>
+        <% errors.forEach(function (error) { %>
+            <p class="validation-messages">
+                <%= error.msg %>
+            </p>
+        <% }); %>
+      <% }; %>
 
       <form method="POST" action="" encType="multipart/form-data">
         <label for="name">Recipe Name: *</label>
@@ -28,7 +32,7 @@
 
         <label for="ingredients"
           >Recipe Ingredients: *
-          <p>
+          <p class="form-hint">
             Please begin each ingredient on its own line and start each line
             with a dash
           </p>
@@ -45,7 +49,7 @@
 
         <label for="steps"
           >Recipe Steps: *
-          <p>
+          <p class="form-hint">
             Please begin each step on its own line and start each line with a
             dash
           </p>
@@ -92,7 +96,7 @@
         </fieldset>
 
         <% if (locals.recipe && recipe.image) { %>
-        <h3>Image preview</h3>
+        <p class="image-preview-label">Image preview</p>
         <img class="image-preview" src="/images/<%=recipe.image%>" />
         <input type="hidden" name="imagePath" value="<%= recipe.image %>" />
 
@@ -113,7 +117,7 @@
         <input id="admin-password" type="password" name="adminPassword" />
         <% }; %>
 
-        <button id="form-submit">Submit</button>
+        <button type="submit">Submit</button>
       </form>
     </main>
   </body>

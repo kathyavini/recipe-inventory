@@ -5,7 +5,9 @@
     <%- include("header") %>
     <main class="recipe-list">
       <h1><%= title %></h1>
-      <p><a href="/catalogue/recipe/create">Create a new recipe</a></p>
+      <p class="create-link">
+        <a href="/catalogue/recipe/create">Create a new recipe</a>
+      </p>
       <% recipes.forEach(function(recipe) { %>
       <a href="<%= recipe.url %>">
         <div class="recipe-card">

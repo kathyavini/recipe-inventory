@@ -3,11 +3,16 @@
   --secondary-font: Calistoga;
 
   --blue: rgb(15, 118, 110);
+  --muted-blue: rgb(17, 94, 89);
   --gold: rgb(206, 151, 62);
   --dull-gold: rgb(169, 121, 43);
 
   --black: rgb(31, 41, 55);
   --muted-black: rgb(75, 85, 99);
+
+  --title-black: rgb(55, 65, 81);
+
+  --grey: #f3f4f6;
 }
 
 body {
@@ -18,13 +23,13 @@ body {
   border: 1px solid salmon;
 } */
 
-.blue {
+span.blue {
   color: var(--blue);
 }
-.gold {
+span.gold {
   color: var(--gold);
 }
-.dull-gold {
+span.dull-gold {
   color: var(--dull-gold);
 }
 
@@ -34,7 +39,14 @@ body {
   font-family: var(--main-font);
   height: 100vh;
   color: var(--black);
+  padding: none;
+  margin: none;
 }
+
+main {
+  padding-bottom: 5vh;
+}
+
 
 img {
   object-fit: cover;
@@ -51,9 +63,13 @@ a:visited {
   color: var(--dull-gold);
 }
 
+
+main.welcome {
+  background-color: white;
+}
+
 main.welcome h1 {
   font-family: var(--secondary-font);
-  color: var(--dull-gold);
   font-size: 5rem;
   line-height: 5.2rem;
 }
@@ -61,37 +77,54 @@ main.welcome p {
   font-size: 1.5rem;
 }
 
-.nav-buttons {
+main.welcome .nav-buttons {
   display: flex;
   gap: 1.5rem;
   margin-top: 8vh;
 }
 
 main.welcome button {
-  color: var(--color-main);
-  background-color: white;
+  color: white;
+  background-color: var(--color-main);
   font-size: clamp(.5rem, 6vw, 1.8rem);
   padding-inline: 1em;
   padding-block: .5em;
   border-radius: 6px;
-  border: 2px solid var(--color-main);
+  border: none;
 }
 
-main.welcome button:hover, main.welcome button:focus {
-  color: white;
-  background-color: var(--color-main);
-  outline: 2px solid var(--color-main);
-  outline-offset: 3px;
+main.welcome button:hover {
+  background-color: var(--color-muted);
+}
+
+main.welcome button:focus {
+  outline: 2px solid var(--color-muted);
+  outline-offset: 1px;
+}
+
+main.welcome p.attribution {
+  font-size: 1rem;
+  padding-top: 4vh;
+  padding-bottom: 10vh;
+  color: var(--muted-black);
 }
 
 button.black {
   --color-main: var(--black);
+  --color-muted: var(--muted-black);
 }
 button.blue {
   --color-main: var(--blue);
+  --color-muted: var(--muted-blue);
 }
 button.gold {
   --color-main: var(--gold);
+  --color-muted: var(--dull-gold);
+}
+
+main, header {
+  min-width: 200px;
+  max-width: 800px;
 }
 
 header {
@@ -125,29 +158,31 @@ header div.links a:hover{
   color: var(--gold);
 }
 
-main.recipe, main.recipe-list, header {
-  min-width: 200px;
-  max-width: 800px;
+main.recipe h1, main.category-list h1, main.recipe-list h1 {
+  color: var(--title-black);
+  font-weight: 700;
+  font-size: 2rem;
 }
 
-main.recipe img {
-  width: min(500px, 100%);
-}
-
-main.recipe h1 {
+/* main.recipe h1 {
   font-size: 2.7rem;
   font-family: var(--main-font);
   font-weight: 600;
-}
+} */
 
 main.recipe h2 {
-  font-size: 1.6rem;
+  font-size: 1.5rem;
   font-family: var(--main-font);
   color: var(--muted-black);
 }
 
 main.recipe ul li::marker {
   color: var(--blue);
+}
+
+p.create-link {
+  font-weight: 500;
+  font-size: 1.2rem;
 }
 
 main.recipe-list h1 {
@@ -159,10 +194,12 @@ main.recipe-list img {
   width: 125px;
   height: 125px;
   flex: none;
-  border-radius: 3px;
+  border-radius: 6px;
 }
 
 main.recipe-list .recipe-card {
+  background-color: white;
+  border-radius: 6px;
   color: var(--gold);
   display: flex;
   flex-flow: column nowrap;
@@ -200,10 +237,10 @@ main.recipe-list .recipe-card .recipe-text {
 }
 
 main.category-list img {
-  width: 175px;
-  height: 175px;
+  width: 200px;
+  height: 200px;
   flex: none;
-  border-radius: 3px;
+  border-radius: 6px;
 }
 
 main.category-list .category-cards {
@@ -211,28 +248,36 @@ main.category-list .category-cards {
   flex-flow: row wrap;
   margin-bottom: 5vh;
   align-items: center;
-  gap: min(30px, 4vw);
+  justify-content: center;
+  gap: min(20px, 4vw);
 }
 
 main.category-list .category-card {
+  border-radius: 6px;
+  background-color: white;
   width: 250px;
   text-align: center;
   padding: 20px;
   box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
 }
 
-main.category-list a {
+
+main.category-list a h2 {
   color: var(--gold);
+  font-weight: 600;
+  font-size: 1.5rem;
+  padding-inline: none;
 }
 
 main.category-list a:hover {
   text-decoration: none;
 }
 
-.validation-messages {
-  color: var(--gold);
-  font-weight: 600;
+main.recipe img {
+  width: min(500px, 100%);
+  height: min(400px, 50vh);
 }
+
 
 form {
   display: flex;
@@ -243,9 +288,23 @@ form {
   padding-bottom: 10vh;
 }
 
-form input {
-  font-size: 1.2rem;
-  border-radius: .375rem;
+.validation-messages {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+form input, form textarea {
+  font-size: 1rem;
+  font-weight: 400;
+  border-radius: 6px;
+  font-family: var(--main-font);
+  border: 1px var(--muted-black) solid;
+  padding: 0.5rem;
+}
+
+form fieldset, form label {
+  font-weight: 500;
+  font-size: .9rem;
 }
 
 fieldset.options {
@@ -253,13 +312,51 @@ fieldset.options {
   flex-flow: column nowrap;
 }
 
+form p.form-hint {
+  color: var(--muted-black);
+  padding-left: 0.5rem;
+  font-size: 0.9rem;
+}
+
+form p.image-preview-label {
+  font-weight: 600;
+  font-size: .9rem;
+  margin-bottom: -0.5rem;
+}
+
+form img.image-preview {
+  height: 100px;
+}
+
+form button {
+  color: white;
+  background-color: var(--blue);
+  font-size: 1.1rem;
+  padding-inline: 1em;
+  padding-block: .5em;
+  border-radius: 6px;
+  border: 2px solid var(--blue);
+}
+
+form button:hover {
+  background-color: var(--muted-blue);
+}
+
+form button:focus {
+  outline: 2px solid var(--muted-blue);
+  outline-offset: 1px;
+} 
+
+@media (min-width: 600px) {
+  form button {
+    width: 150px;
+    align-self: flex-end;
+  }
+}
+
 footer {
-  margin-top: 5vh;
   padding-top: 1rem;
   border-top: 1px solid var(--muted-black);
   padding-bottom: 10vh;
 }
 
-img.image-preview {
-  height: 100px;
-}

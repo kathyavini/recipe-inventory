@@ -2,32 +2,26 @@
 <html>
   <%- include("head") %>
   <body>
-    <header>
-      <div class="logo">
-        <a href="/"><h2>Odin<span class="blue">Recipes</span></a></h2>
-      </div>
-      <div class="links">
-        <h3><a href="/catalogue/recipes">Recipes</a></h3>
-        <h3><a href="/catalogue/categories">Categories</a></h3>
-      </div>
-    </header>
+    <%- include("header") %>
     <main class="category-list">
       <h1><%= title %></h1>
 
-      <p><a href="/catalogue/category/create">Create a new category</a></p>
+      <p class="create-link">
+        <a href="/catalogue/category/create">Create a new category</a>
+      </p>
 
       <div class="category-cards">
-            <% categories.forEach(function(category) { %>
-              <a href="<%= category.url %>">
-                <div class="category-card">
-                    <img src="/images/<%=category.image%>"/>
-                    <div>
-                        <h2><%- category.name%></h2>
-                    </div>
-                </div>
-              </a>
-            <% }); %>
-        </div>
+        <% categories.forEach(function(category) { %>
+        <a href="<%= category.url %>">
+          <div class="category-card">
+            <img src="/images/<%=category.image%>" />
+            <div>
+              <h2><%- category.name%></h2>
+            </div>
+          </div>
+        </a>
+        <% }); %>
+      </div>
     </main>
   </body>
 </html>

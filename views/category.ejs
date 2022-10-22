@@ -2,36 +2,25 @@
 <html>
   <%- include("head") %>
   <body>
-    <header>
-      <div class="logo">
-        <a href="/"><h2>Odin<span class="blue">Recipes</span></a></h2>
-      </div>
-      <div class="links">
-        <h3><a href="/catalogue/recipes">Recipes</a></h3>
-        <h3><a href="/catalogue/categories">Categories</a></h3>
-      </div>
-    </header>
+    <%- include("header") %>
     <main class="recipe">
       <h1><%- title %></h1>
 
       <img src="/images/<%=category.image%>" />
 
       <% if (recipes.length > 0) { %>
-        <h2>Recipes:</h2>
-        <ul>
+      <h2>Recipes:</h2>
+      <ul>
         <% recipes.forEach(function (recipe) { %>
-            <li>
-                <a href="<%=recipe.url%>">
-                    <%- recipe.name %>
-                </a>
-            </li>
+        <li>
+          <a href="<%=recipe.url%>"> <%- recipe.name %> </a>
+        </li>
         <% }) %>
-        </ul>
+      </ul>
 
       <% } else { %>
-        <h2>This category has no recipes yet.</h2>
-      <% }; %> 
-      
+      <h2>This category has no recipes yet.</h2>
+      <% }; %>
     </main>
     <footer>
       <p><a href="<%=category.url + '/delete'%>">Delete this category</a></p>
