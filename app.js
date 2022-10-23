@@ -18,8 +18,9 @@ const app = express();
 
 app.use(
   helmet({
-    // There is definitely a more refined way to set these, but for the time being to get my EJS scripts working...
+    // There is definitely a more refined way to set these, but for the time being to get my EJS scripts working and my cloudinary images displaying...
     contentSecurityPolicy: false,
+    crossOriginResourcePolicy: false,
   })
 );
 
