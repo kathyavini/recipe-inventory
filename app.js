@@ -11,7 +11,17 @@ const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const catalogueRouter = require('./routes/catalogue');
 
+const compression = require('compression');
+const helmet = require('helmet');
+
 const app = express();
+
+app.use(
+  helmet({
+    // There is definitely a more refined way to set these, but for the time being to get my EJS scripts working...
+    contentSecurityPolicy: false,
+  })
+);
 
 // Load secure credentials
 dotenv.config();
@@ -38,6 +48,8 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+app.use(compression()); // Compress all routes
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
