@@ -3,13 +3,14 @@ const Category = require('../models/category');
 const async = require('async');
 const { body, validationResult } = require('express-validator');
 const fs = require('fs');
+const cloudinary = require('cloudinary').v2;
 
 const updateImage = require('../utils/forms/updateImage');
 const processTextArea = require('../utils/forms/processTextArea');
 
 // Display list of all Recipes.
 exports.recipe_list = (req, res, next) => {
-  Recipe.find({}, 'name description image categories')
+  Recipe.find({}, 'name description image imageCloudUrl categories')
     .sort({ name: 1 })
     .populate('categories')
     .exec((err, list_recipes) => {
@@ -190,12 +191,34 @@ exports.recipe_create_post = [
 
             return;
           }
+          // No recipe with this name exists
 
           // Save new data to the collection
           recipe.save((err) => {
             if (err) {
               return next(err);
             }
+
+            // Save this image to the cloud (async)
+            cloudinary.uploader
+              .upload(`public/images/${recipe.image}`, {
+                folder: 'recipes',
+              })
+              .then((result) => {
+                console.log(result);
+
+                // If successful add cloud url (to view) and public_id (to delete) to model
+                recipe.imageCloudUrl = result.secure_url;
+                recipe.imageCloudId = result.public_id;
+
+                // And update database
+                Recipe.findByIdAndUpdate(recipe._id, recipe, {}, (err) => {
+                  if (err) {
+                    return next(err);
+                  }
+                });
+                // Redirect unnecessary; happens outside async call
+              });
             // Recipe has been saved. Redirect to its detail page
             res.redirect(recipe.url);
           });
@@ -284,13 +307,20 @@ exports.recipe_delete_post = [
             return next(err);
           }
 
-          // Delete recipe image
+          // Delete recipe image (local)
           fs.unlink(`public/images/${results.recipe.image}`, (err) => {
             if (err) {
               // Not a big issue if the image deletion fails; just log it
               console.log(err);
             }
           });
+
+          // Delete recipe image from cloud (async)
+          cloudinary.uploader
+            .destroy(results.recipe.imageCloudId)
+            .then((result) => {
+              console.log(result);
+            });
 
           // Success - go to recipe list
           res.redirect('/catalogue/recipes');
@@ -456,6 +486,37 @@ exports.recipe_update_post = [
     Recipe.findByIdAndUpdate(req.params.id, recipe, {}, (err, therecipe) => {
       if (err) {
         return next(err);
+      }
+      // If image has changed sync cloud data
+      if (recipe.image !== therecipe.image) {
+        // Save new image to the cloud (async)
+        cloudinary.uploader
+          .upload(`public/images/${recipe.image}`, {
+            folder: 'recipes',
+          })
+          .then((result) => {
+            console.log(result);
+
+            // If successful add new cloud url to model
+            recipe.imageCloudUrl = result.secure_url;
+            recipe.imageCloudId = result.public_id;
+
+            // Update database
+            Recipe.findByIdAndUpdate(recipe._id, recipe, {}, (err) => {
+              if (err) {
+                return next(err);
+              }
+            });
+
+            // And delete previous asset from cloud (async)
+            cloudinary.uploader
+              .destroy(therecipe.imageCloudId)
+              .then((result) => {
+                console.log(result);
+              });
+
+            // redirect unnecessary; happens outside the async calls
+          });
       }
       // Recipe has been saved. Redirect to its detail page
       res.redirect(therecipe.url);

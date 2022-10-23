@@ -8,6 +8,8 @@ const RecipeSchema = new Schema({
   ingredients: { type: [String] },
   steps: { type: [String] },
   image: { type: String },
+  imageCloudUrl: String,
+  imageCloudId: String,
   sourceLink: { type: String },
   sourceText: { type: String },
   categories: [{ type: Schema.Types.ObjectId, ref: 'Category' }],

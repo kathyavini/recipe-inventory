@@ -97,7 +97,7 @@
 
         <% if (locals.recipe && recipe.image) { %>
         <p class="image-preview-label">Image preview</p>
-        <img class="image-preview" src="/images/<%=recipe.image%>" />
+        <img class="image-preview" src=<%=recipe.imageCloudUrl ? recipe.imageCloudUrl : `/images/${recipe.image}`%> />
         <input type="hidden" name="imagePath" value="<%= recipe.image %>" />
 
         <label for="recipe-image">Upload a different image: </label>

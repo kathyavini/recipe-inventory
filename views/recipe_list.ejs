@@ -12,7 +12,7 @@
       <a href="<%= recipe.url %>">
         <div class="recipe-card">
           <div class="recipe-top">
-            <img src="/images/<%=recipe.image%>" />
+            <img src=<%=recipe.imageCloudUrl ? recipe.imageCloudUrl : `/images/${recipe.image}`%> />
             <div>
               <h2><%- recipe.name%></h2>
             </div>

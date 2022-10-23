@@ -83,7 +83,6 @@ exports.category_create_post = [
     const category = new Category({
       name: req.body.name,
       image: updateImage(req.body.imagePath, req.file),
-      imageCloudUrl: '', // will be set after Cloudinary upload if successful
     });
 
     if (errors.length > 0) {
@@ -350,7 +349,6 @@ exports.category_update_post = [
     const category = new Category({
       name: req.body.name,
       image: updateImage(req.body.imagePath, req.file),
-      imageCloudUrl: '', // will be set after Cloudinary upload if successful
       _id: req.params.id,
     });
 
@@ -377,11 +375,7 @@ exports.category_update_post = [
         }
 
         // If image has changed sync cloud data
-        console.log(category);
-        console.log(thecategory);
         if (category.image !== thecategory.image) {
-          console.log('THIS IMAGE NEEDS UPDATING');
-
           // Save new image to the cloud (async)
           cloudinary.uploader
             .upload(`public/images/${category.image}`, {
@@ -410,8 +404,6 @@ exports.category_update_post = [
 
               // redirect unnecessary; happens outside the async calls
             });
-        } else {
-          console.log('IMAGE UNCHANGED!');
         }
 
         // Category has been saved. Redirect to its detail page
