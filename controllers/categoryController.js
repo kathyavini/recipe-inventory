@@ -3,12 +3,13 @@ const Recipe = require('../models/recipe');
 const async = require('async');
 const { body, validationResult } = require('express-validator');
 const fs = require('fs');
+const cloudinary = require('cloudinary').v2;
 
 const updateImage = require('../utils/forms/updateImage');
 
 // Display list of all Categories.
 exports.category_list = (req, res, next) => {
-  Category.find({}, 'name image')
+  Category.find({}, 'name image imageCloudUrl')
     .sort({ name: 1 })
     .exec((err, list_categories) => {
       if (err) {
@@ -82,6 +83,7 @@ exports.category_create_post = [
     const category = new Category({
       name: req.body.name,
       image: updateImage(req.body.imagePath, req.file),
+      imageCloudUrl: '', // will be set after Cloudinary upload if successful
     });
 
     if (errors.length > 0) {
@@ -119,6 +121,33 @@ exports.category_create_post = [
             if (err) {
               return next(err);
             }
+
+            // Save this image to the cloud (async)
+            cloudinary.uploader
+              .upload(`public/images/${category.image}`, {
+                folder: 'recipes',
+              })
+              .then((result) => {
+                console.log(result);
+
+                // If successful add cloud url (to view) and public_id (to delete) to model
+                category.imageCloudUrl = result.secure_url;
+                category.imageCloudId = result.public_id;
+
+                // And update database
+                Category.findByIdAndUpdate(
+                  category._id,
+                  category,
+                  {},
+                  (err) => {
+                    if (err) {
+                      return next(err);
+                    }
+                  }
+                );
+                // redirect unnecessary; happens outside this async call
+              });
+
             // Category has been saved. Redirect to its detail page
             res.redirect(category.url);
           });
@@ -235,13 +264,20 @@ exports.category_delete_post = [
           return next(err);
         }
 
-        // Delete category image
+        // Delete category image (local)
         fs.unlink(`public/images/${results.delete_category.image}`, (err) => {
           if (err) {
             // Not a big issue if the image deletion fails; just log it
             console.log(err);
           }
         });
+
+        // Delete category image from cloud (async)
+        cloudinary.uploader
+          .destroy(results.delete_category.imageCloudId)
+          .then((result) => {
+            console.log(result);
+          });
 
         // Success - go to category list
         res.redirect('/catalogue/categories');
@@ -314,6 +350,7 @@ exports.category_update_post = [
     const category = new Category({
       name: req.body.name,
       image: updateImage(req.body.imagePath, req.file),
+      imageCloudUrl: '', // will be set after Cloudinary upload if successful
       _id: req.params.id,
     });
 
@@ -338,6 +375,45 @@ exports.category_update_post = [
         if (err) {
           return next(err);
         }
+
+        // If image has changed sync cloud data
+        console.log(category);
+        console.log(thecategory);
+        if (category.image !== thecategory.image) {
+          console.log('THIS IMAGE NEEDS UPDATING');
+
+          // Save new image to the cloud (async)
+          cloudinary.uploader
+            .upload(`public/images/${category.image}`, {
+              folder: 'recipes',
+            })
+            .then((result) => {
+              console.log(result);
+
+              // If successful add new cloud url to model
+              category.imageCloudUrl = result.secure_url;
+              category.imageCloudId = result.public_id;
+
+              // Update database
+              Category.findByIdAndUpdate(category._id, category, {}, (err) => {
+                if (err) {
+                  return next(err);
+                }
+              });
+
+              // And delete previous asset from cloud (async)
+              cloudinary.uploader
+                .destroy(thecategory.imageCloudId)
+                .then((result) => {
+                  console.log(result);
+                });
+
+              // redirect unnecessary; happens outside the async calls
+            });
+        } else {
+          console.log('IMAGE UNCHANGED!');
+        }
+
         // Category has been saved. Redirect to its detail page
         res.redirect(thecategory.url);
       }

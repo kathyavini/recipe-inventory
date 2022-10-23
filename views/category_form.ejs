@@ -27,7 +27,11 @@
 
         <% if (locals.category && category.image) { %>
         <p class="image-preview-label">Image preview</p>
-        <img class="image-preview" src="/images/<%=category.image%>" />
+        <img
+          class="image-preview"
+          src=<%=category.imageCloudUrl ? 
+            category.imageCloudUrl : 
+            `/images/${category.image}`%> />
         <input type="hidden" name="imagePath" value="<%= category.image %>" />
 
         <label for="category-image">Upload a different image: </label>

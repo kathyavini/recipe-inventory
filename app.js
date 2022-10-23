@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+const cloudinary = require('cloudinary').v2;
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
@@ -14,10 +15,17 @@ const app = express();
 
 // Load secure credentials
 dotenv.config();
-const mongoURI = process.env.mongoURI;
+
+// Set up cloundinary
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET,
+  secure: true,
+});
 
 // Set up mongoose connection
-const mongoDB = mongoURI;
+const mongoDB = process.env.mongoURI;
 mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));

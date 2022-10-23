@@ -14,7 +14,11 @@
         <% categories.forEach(function(category) { %>
         <a href="<%= category.url %>">
           <div class="category-card">
-            <img src="/images/<%=category.image%>" />
+            <img
+              src=<%=category.imageCloudUrl ?
+                category.imageCloudUrl : 
+                `/images/${category.image}`%>
+            />
             <div>
               <h2><%- category.name%></h2>
             </div>
