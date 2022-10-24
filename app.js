@@ -18,9 +18,10 @@ const app = express();
 
 app.use(
   helmet({
-    // There is definitely a more refined way to set these, but for the time being to get my EJS scripts working and my cloudinary images displaying...
+    // There is definitely a more refined way to set these, but for the time being to get my EJS scripts working:
     contentSecurityPolicy: false,
-    crossOriginResourcePolicy: false,
+    // And see https://stackoverflow.com/questions/70752770/helmet-express-err-blocked-by-response-notsameorigin-200
+    crossOriginEmbedderPolicy: false,
   })
 );
 
