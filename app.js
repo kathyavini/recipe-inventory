@@ -8,7 +8,7 @@ const dotenv = require('dotenv');
 const cloudinary = require('cloudinary').v2;
 
 const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
+// const usersRouter = require('./routes/users');
 const catalogueRouter = require('./routes/catalogue');
 
 const compression = require('compression');
@@ -55,7 +55,7 @@ app.use(compression()); // Compress all routes
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+// app.use('/users', usersRouter);
 app.use('/catalogue', catalogueRouter);
 
 // catch 404 and forward to error handler

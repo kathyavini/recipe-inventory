@@ -1,12 +1,14 @@
-const Recipe = require('../models/recipe');
-const Category = require('../models/category');
 const async = require('async');
 const { body, validationResult } = require('express-validator');
 const fs = require('fs');
 const cloudinary = require('cloudinary').v2;
 
+const upload = require('../config/multer');
 const updateImage = require('../utils/forms/updateImage');
 const processTextArea = require('../utils/forms/processTextArea');
+
+const Recipe = require('../models/recipe');
+const Category = require('../models/category');
 
 // Display list of all Recipes.
 exports.recipe_list = (req, res, next) => {
@@ -67,6 +69,7 @@ exports.recipe_create_get = (req, res, next) => {
 
 // Handle Recipe create on POST.
 exports.recipe_create_post = [
+  upload.single('recipeImage'),
   // Convert the categories checked to an array.
   (req, res, next) => {
     if (!Array.isArray(req.body.categories)) {
@@ -77,16 +80,25 @@ exports.recipe_create_post = [
   },
 
   // Validate and sanitize text fields with express-validator
-  body('name', 'Recipe name required').trim().isLength({ min: 1 }).escape(),
+  body('name', 'Recipe name required') //
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
 
-  body('description').trim().optional({ checkFalsy: true }).escape(),
+  body('description') //
+    .trim()
+    .optional({ checkFalsy: true })
+    .escape(),
 
   body('ingredients', 'Ingredients are required')
     .trim()
     .isLength({ min: 1 })
     .escape(),
 
-  body('steps', 'Steps are required').trim().isLength({ min: 1 }).escape(),
+  body('steps', 'Steps are required') //
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
 
   body(
     'sourceLink',
@@ -97,9 +109,13 @@ exports.recipe_create_post = [
     .isURL({ require_protocol: true })
     .escape(),
 
-  body('sourceText').trim().optional({ checkFalsy: true }).escape(),
+  body('sourceText') //
+    .trim()
+    .optional({ checkFalsy: true })
+    .escape(),
 
-  body('categories.*').escape(),
+  body('categories.*') //
+    .escape(),
 
   // Process request after validation and sanitization
   (req, res, next) => {
@@ -217,7 +233,6 @@ exports.recipe_create_post = [
                     return next(err);
                   }
                 });
-                // Redirect unnecessary; happens outside async call
               });
             // Recipe has been saved. Redirect to its detail page
             res.redirect(recipe.url);
@@ -242,7 +257,6 @@ exports.recipe_delete_get = (req, res, next) => {
         return next(err);
       }
       if (results.recipe == null) {
-        // No results.
         res.redirect('/catalogue/recipes');
       }
       // Successful, so render.
@@ -374,6 +388,7 @@ exports.recipe_update_get = (req, res, next) => {
 
 // Handle Recipe update on POST.
 exports.recipe_update_post = [
+  upload.single('recipeImage'),
   // Convert the categories checked to an array.
   (req, res, next) => {
     if (!Array.isArray(req.body.categories)) {
@@ -384,16 +399,25 @@ exports.recipe_update_post = [
   },
 
   // Validate and sanitize text fields with express-validator
-  body('name', 'Recipe name required').trim().isLength({ min: 1 }).escape(),
+  body('name', 'Recipe name required') //
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
 
-  body('description').trim().optional({ checkFalsy: true }).escape(),
+  body('description') //
+    .trim()
+    .optional({ checkFalsy: true })
+    .escape(),
 
   body('ingredients', 'Ingredients are required')
     .trim()
     .isLength({ min: 1 })
     .escape(),
 
-  body('steps', 'Steps are required').trim().isLength({ min: 1 }).escape(),
+  body('steps', 'Steps are required') //
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
 
   body(
     'sourceLink',
@@ -404,9 +428,13 @@ exports.recipe_update_post = [
     .isURL({ require_protocol: true })
     .escape(),
 
-  body('sourceText').trim().optional({ checkFalsy: true }).escape(),
+  body('sourceText') //
+    .trim()
+    .optional({ checkFalsy: true })
+    .escape(),
 
-  body('categories.*').escape(),
+  body('categories.*') //
+    .escape(),
 
   body('adminPassword', 'Admin password is required for update')
     .trim()

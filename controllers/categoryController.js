@@ -1,11 +1,13 @@
-const Category = require('../models/category');
-const Recipe = require('../models/recipe');
 const async = require('async');
 const { body, validationResult } = require('express-validator');
 const fs = require('fs');
 const cloudinary = require('cloudinary').v2;
 
+const upload = require('../config/multer');
 const updateImage = require('../utils/forms/updateImage');
+
+const Category = require('../models/category');
+const Recipe = require('../models/recipe');
 
 // Display list of all Categories.
 exports.category_list = (req, res, next) => {
@@ -65,8 +67,12 @@ exports.category_create_get = (req, res, next) => {
 
 // Handle Category create on POST.
 exports.category_create_post = [
+  upload.single('categoryImage'),
   // Validation and sanitization by express-validator (text field)
-  body('name', 'Category name required').trim().isLength({ min: 1 }).escape(),
+  body('name', 'Category name required') //
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
 
   (req, res, next) => {
     // Extract the express-validator errors
@@ -144,7 +150,6 @@ exports.category_create_post = [
                     }
                   }
                 );
-                // redirect unnecessary; happens outside this async call
               });
 
             // Category has been saved. Redirect to its detail page
@@ -317,6 +322,8 @@ exports.category_update_get = (req, res, next) => {
 
 // Handle Category update on POST.
 exports.category_update_post = [
+  upload.single('categoryImage'),
+
   body('name', 'Category name required').trim().isLength({ min: 1 }).escape(),
 
   body('adminPassword', 'Admin password is required for update')
@@ -401,8 +408,6 @@ exports.category_update_post = [
                 .then((result) => {
                   console.log(result);
                 });
-
-              // redirect unnecessary; happens outside the async calls
             });
         }
 
