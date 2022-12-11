@@ -128,6 +128,8 @@ exports.recipe_create_post = [
       });
     }
 
+    const localImage = updateImage(req.body.imagePath, req.file);
+
     // Create a recipe object with escaped and trimmed data
     const recipe = new Recipe({
       name: req.body.name,
@@ -140,7 +142,7 @@ exports.recipe_create_post = [
       sourceLink: req.body.sourceLink,
       sourceText: req.body.sourceText,
       categories: req.body.categories,
-      image: updateImage(req.body.imagePath, req.file),
+      image: localImage,
     });
 
     if (errors.length > 0) {
@@ -464,6 +466,8 @@ exports.recipe_update_post = [
       });
     }
 
+    const localImage = updateImage(req.body.imagePath, req.file);
+
     // Create a recipe object with escaped and trimmed data
     const recipe = new Recipe({
       name: req.body.name,
@@ -476,9 +480,15 @@ exports.recipe_update_post = [
       sourceLink: req.body.sourceLink,
       sourceText: req.body.sourceText,
       categories: req.body.categories,
-      image: updateImage(req.body.imagePath, req.file),
+      image: localImage,
       _id: req.params.id, //This is required, or a new ID will be assigned!
     });
+
+    // If a new image has been uploaded, the database won't be updated with the new URL in time for the res.redirect(), so the cloud URL  image should be cleared (in order to default to showing the local file)
+    if (req.file) {
+      recipe.imageCloudId = '';
+      recipe.imageCloudUrl = '';
+    }
 
     if (errors.length > 0) {
       // Render the form again with sanitized values and error messages

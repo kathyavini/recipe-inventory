@@ -352,12 +352,20 @@ exports.category_update_post = [
       });
     }
 
+    const localImage = updateImage(req.body.imagePath, req.file);
+
     // Create a category object with escaped and trimmed data
     const category = new Category({
       name: req.body.name,
-      image: updateImage(req.body.imagePath, req.file),
+      image: localImage,
       _id: req.params.id,
     });
+
+    // If a new image has been uploaded, the database won't be updated with the new URL in time for the res.redirect(), so the cloud URL  image should be cleared (in order to default to showing the local file)
+    if (req.file) {
+      category.imageCloudId = '';
+      category.imageCloudUrl = '';
+    }
 
     if (errors.length > 0) {
       // Render the form again with sanitized values and error messages
@@ -383,6 +391,7 @@ exports.category_update_post = [
 
         // If image has changed sync cloud data
         if (category.image !== thecategory.image) {
+          console.log('image has been changed');
           // Save new image to the cloud (async)
           cloudinary.uploader
             .upload(`public/images/${category.image}`, {
