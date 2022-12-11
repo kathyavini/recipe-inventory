@@ -25,14 +25,15 @@
           value="<%- locals.category ? category.name : '' %>"
         />
 
-        <% if (locals.category && category.image) { %>
+        <% if (locals.category && (locals.imageCloud || locals.imageLocal || category.image)) { %>
         <p class="image-preview-label">Image preview</p>
         <img
           class="image-preview"
-          src=<%=category.imageCloudUrl ? 
-            category.imageCloudUrl : 
-            `/images/${category.image}`%> />
+          src=<%= locals.imageLocal ? `/images/${locals.imageLocal}` : locals.imageCloud ? locals.imageCloud : category.imageCloudUrl ? category.imageCloudUrl : `/images/${category.image}`%> />
         <input type="hidden" name="imagePath" value="<%= category.image %>" />
+        <input type="hidden" name="imageCloud" value="<%= category.imageCloudUrl %>" />
+        <input type="hidden" name="imageUpdated" value="<%= locals.imageUpdated %>" />
+
 
         <label for="category-image">Upload a different image: </label>
         <% } else { %>

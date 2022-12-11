@@ -95,10 +95,14 @@
           <% }); %>
         </fieldset>
 
-        <% if (locals.recipe && recipe.image) { %>
+        <% if (locals.recipe && (locals.imageCloud || locals.imageLocal || recipe.image)) { %>
         <p class="image-preview-label">Image preview</p>
-        <img class="image-preview" src=<%=recipe.imageCloudUrl ? recipe.imageCloudUrl : `/images/${recipe.image}`%> />
+        <img
+          class="image-preview"
+          src=<%= locals.imageLocal ? `/images/${locals.imageLocal}` : locals.imageCloud ? locals.imageCloud : recipe.imageCloudUrl ? recipe.imageCloudUrl : `/images/${recipe.image}`%> />
         <input type="hidden" name="imagePath" value="<%= recipe.image %>" />
+        <input type="hidden" name="imageCloud" value="<%= recipe.imageCloudUrl %>" />
+        <input type="hidden" name="imageUpdated" value="<%= locals.imageUpdated %>" />
 
         <label for="recipe-image">Upload a different image: </label>
         <% } else { %>

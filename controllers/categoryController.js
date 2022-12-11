@@ -1,6 +1,5 @@
 const async = require('async');
 const { body, validationResult } = require('express-validator');
-const fs = require('fs');
 const cloudinary = require('cloudinary').v2;
 
 const upload = require('../config/multer');
@@ -85,11 +84,20 @@ exports.category_create_post = [
       });
     }
 
+    const localImage = updateImage(req.body.imagePath, req.file);
+
     // Create a category object with escaped and trimmed data
     const category = new Category({
       name: req.body.name,
-      image: updateImage(req.body.imagePath, req.file),
+      image: localImage.path,
     });
+
+    // If validation fails, these values are passed back and forth between the form view and the POST controller to render the correct image preview and keep track of whether the image has ever been updated since editing began
+    const imageInfo = {
+      imageCloud: req.body.imageCloud,
+      imageLocal: localImage.exists ? localImage.path : '',
+      imageUpdated: localImage.updated || req.body.imageUpdated,
+    };
 
     if (errors.length > 0) {
       // Render the form again with sanitized values and error messages
@@ -97,6 +105,7 @@ exports.category_create_post = [
         title: 'Create Category',
         category,
         errors: errors,
+        ...imageInfo, // will allow preview to stay current with most recent upload even if validation fails
       });
       return;
     } else {
@@ -268,14 +277,6 @@ exports.category_delete_post = [
           return next(err);
         }
 
-        // Delete category image (local)
-        fs.unlink(`public/images/${results.delete_category.image}`, (err) => {
-          if (err) {
-            // Not a big issue if the image deletion fails; just log it
-            console.log(err);
-          }
-        });
-
         // Delete category image from cloud (async)
         cloudinary.uploader
           .destroy(results.delete_category.imageCloudId)
@@ -324,7 +325,10 @@ exports.category_update_get = (req, res, next) => {
 exports.category_update_post = [
   upload.single('categoryImage'),
 
-  body('name', 'Category name required').trim().isLength({ min: 1 }).escape(),
+  body('name', 'Category name required') //
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
 
   body('adminPassword', 'Admin password is required for update')
     .trim()
@@ -357,26 +361,37 @@ exports.category_update_post = [
     // Create a category object with escaped and trimmed data
     const category = new Category({
       name: req.body.name,
-      image: localImage,
+      image: localImage.path,
       _id: req.params.id,
     });
 
-    // If a new image has been uploaded, the database won't be updated with the new URL in time for the res.redirect(), so the cloud URL  image should be cleared (in order to default to showing the local file)
-    if (req.file) {
-      category.imageCloudId = '';
-      category.imageCloudUrl = '';
-    }
+    // If validation fails, these values are passed back and forth between the form view and the POST controller to render the correct image preview and keep track of whether the image has ever been updated since editing began
+    const imageInfo = {
+      imageCloud: req.body.imageCloud,
+      imageLocal: localImage.exists ? localImage.path : '',
+      imageUpdated: localImage.updated || req.body.imageUpdated,
+    };
 
     if (errors.length > 0) {
+      console.log('Errors, so form is being re-rendered with:', category, {
+        imageInfo,
+      });
       // Render the form again with sanitized values and error messages
       res.render('category_form', {
         title: 'Update Category: ' + category.name,
         category,
         errors: errors,
+        ...imageInfo,
         destructive: true,
       });
 
       return;
+    }
+
+    // localImage.updated refers to a file upload in the current POST; req.body.imageUpdated refers to whether the image has ever been updated since editing began (regardless of the number of times the form view has been re-rendered due to validation errors)
+    if (localImage.updated || req.body.imageUpdated) {
+      category.imageCloudId = '';
+      category.imageCloudUrl = '';
     }
 
     // Data valid; update record
@@ -391,7 +406,6 @@ exports.category_update_post = [
 
         // If image has changed sync cloud data
         if (category.image !== thecategory.image) {
-          console.log('image has been changed');
           // Save new image to the cloud (async)
           cloudinary.uploader
             .upload(`public/images/${category.image}`, {

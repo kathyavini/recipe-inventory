@@ -1,6 +1,5 @@
 const async = require('async');
 const { body, validationResult } = require('express-validator');
-const fs = require('fs');
 const cloudinary = require('cloudinary').v2;
 
 const upload = require('../config/multer');
@@ -142,8 +141,15 @@ exports.recipe_create_post = [
       sourceLink: req.body.sourceLink,
       sourceText: req.body.sourceText,
       categories: req.body.categories,
-      image: localImage,
+      image: localImage.path,
     });
+
+    // If validation fails, these values are passed back and forth between the form view and the POST controller to render the correct image preview and keep track of whether the image has ever been updated since editing began
+    const imageInfo = {
+      imageCloud: req.body.imageCloud,
+      imageLocal: localImage.exists ? localImage.path : '',
+      imageUpdated: localImage.updated || req.body.imageUpdated,
+    };
 
     if (errors.length > 0) {
       // Render the form again with sanitized values and error messages
@@ -168,6 +174,7 @@ exports.recipe_create_post = [
             categories: list_categories,
             recipe,
             errors,
+            ...imageInfo,
           });
         });
       return;
@@ -323,14 +330,6 @@ exports.recipe_delete_post = [
             return next(err);
           }
 
-          // Delete recipe image (local)
-          fs.unlink(`public/images/${results.recipe.image}`, (err) => {
-            if (err) {
-              // Not a big issue if the image deletion fails; just log it
-              console.log(err);
-            }
-          });
-
           // Delete recipe image from cloud (async)
           cloudinary.uploader
             .destroy(results.recipe.imageCloudId)
@@ -480,18 +479,21 @@ exports.recipe_update_post = [
       sourceLink: req.body.sourceLink,
       sourceText: req.body.sourceText,
       categories: req.body.categories,
-      image: localImage,
+      image: localImage.path,
       _id: req.params.id, //This is required, or a new ID will be assigned!
     });
 
-    // If a new image has been uploaded, the database won't be updated with the new URL in time for the res.redirect(), so the cloud URL  image should be cleared (in order to default to showing the local file)
-    if (req.file) {
-      recipe.imageCloudId = '';
-      recipe.imageCloudUrl = '';
-    }
+    // If validation fails, these values are passed back and forth between the form view and the POST controller to render the correct image preview and keep track of whether the image has ever been updated since editing began
+    const imageInfo = {
+      imageCloud: req.body.imageCloud,
+      imageLocal: localImage.exists ? localImage.path : '',
+      imageUpdated: localImage.updated || req.body.imageUpdated,
+    };
 
     if (errors.length > 0) {
-      // Render the form again with sanitized values and error messages
+      console.log('Errors, so form is being re-rendered with:', recipe, {
+        imageInfo,
+      });
 
       // Get all categories for the form
       Category.find({}, 'name')
@@ -513,11 +515,18 @@ exports.recipe_update_post = [
             categories: list_categories,
             recipe,
             errors,
+            ...imageInfo,
             destructive: true,
           });
         });
 
       return;
+    }
+
+    // localImage.updated refers to a file upload in the current POST; req.body.imageUpdated refers to whether the image has ever been updated since editing began (regardless of the number of times the form view has been re-rendered due to validation errors)
+    if (localImage.updated || req.body.imageUpdated) {
+      recipe.imageCloudId = '';
+      recipe.imageCloudUrl = '';
     }
 
     // Data from form is valid; update the record
