@@ -34,7 +34,6 @@
         <input type="hidden" name="imageCloud" value="<%= category.imageCloudUrl %>" />
         <input type="hidden" name="imageUpdated" value="<%= locals.imageUpdated %>" />
 
-
         <label for="category-image">Upload a different image: </label>
         <% } else { %>
         <label for="category-image"
@@ -58,4 +57,21 @@
       </form>
     </main>
   </body>
+  <script>
+    const handleFileChange = (event) => {
+      if (!event.target.files) {
+        return;
+      }
+
+      const [newFile] = event.target.files;
+
+      const previewImage = document.querySelector('.image-preview')
+      previewImage.src=URL.createObjectURL(newFile);
+
+    };
+
+    const fileInput = document.querySelector('#category-image');
+    fileInput.addEventListener('change', handleFileChange)
+
+  </script>
 </html>
